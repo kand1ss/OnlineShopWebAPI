@@ -37,7 +37,7 @@ public class CatalogManagementService(IRabbitMQClient client, IServiceScopeFacto
     }
 
     private async Task RegisterConsumer<TRequest>(
-        IMessageDeserializer<string, TRequest> deserializer,
+        IMessageDeserializer<byte[], TRequest> deserializer,
         string consumeQueue,
         string publishRoutingKey,
         CancellationToken ct = default) 

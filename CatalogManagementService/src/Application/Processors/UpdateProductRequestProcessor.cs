@@ -11,7 +11,7 @@ public class UpdateProductRequestProcessor(IProductRepository repository, ILogge
 {
     public async Task<Product> Process(UpdateProductRequest data)
     {
-        var product = await repository.GetAsync(Guid.Parse(data.Id));
+        var product = await repository.GetAsync(data.Id);
         if (product is null)
             throw new InvalidOperationException($"UPDATE: Product with id '{data.Id}' not found.");
         

@@ -34,7 +34,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="src\Application\Validator\" />
       <Folder Include="src\Infrastructure\Database\Migrations\" />
     </ItemGroup>
 

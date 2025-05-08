@@ -13,12 +13,12 @@ namespace CatalogManagementService.Application.Consumers;
 public class ProcessingAndPublishingMessageConsumer<TRequest>(
     IRabbitMQClient client, 
     IServiceScopeFactory scopeFactory,
-    IMessageDeserializer<string, TRequest> deserializer,
+    IMessageDeserializer<byte[], TRequest> deserializer,
     string publishRoutingKey) : IMessageConsumer
 {
     public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
     {
-        var data = deserializer.Deserialize(ea.GetBodyAsString());
+        var data = deserializer.Deserialize(ea.Body.ToArray());
         
         using var scope = scopeFactory.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<IRequestProcessor<TRequest, Product>>();

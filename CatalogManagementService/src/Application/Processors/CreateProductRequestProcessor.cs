@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Infrastructure.Repositories;
 using Core;
@@ -5,7 +6,8 @@ using Core.Contracts;
 
 namespace CatalogManagementService.Application;
 
-public class CreateProductRequestProcessor(IProductRepository repository, ILogger<CreateProductRequestProcessor> logger) 
+public class CreateProductRequestProcessor(
+    IProductRepository repository, ILogger<CreateProductRequestProcessor> logger) 
     : IRequestProcessor<CreateProductRequest, Product>
 {
     public async Task<Product> Process(CreateProductRequest data)
