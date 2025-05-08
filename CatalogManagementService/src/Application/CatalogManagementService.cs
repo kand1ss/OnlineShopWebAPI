@@ -3,23 +3,36 @@ using CatalogManagementService.Application.DTO;
 using CatalogService.Domain;
 using Core;
 using Core.Contracts;
-using Core.DTO;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQClient;
+using RabbitMQClient.Contracts;
 
 namespace CatalogManagementService.Application;
 
-public class CatalogManagementService(IRabbitMQClient client, IServiceScopeFactory scopeFactory) 
+public class CatalogManagementService(IRabbitMQClient client, IConnectionService connectionService, 
+    IServiceScopeFactory scopeFactory, ILogger<CatalogManagementService> logger) 
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await client.CreateConnectionAsync(stoppingToken);
-        var configurator = new CatalogManagementServiceConfigurator(client);
+        try
+        {
+            await Initialize(stoppingToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical($"Error in service: '{e.Message}'");
+        }
+    }
 
-        await configurator.ConfigureAsync(stoppingToken);
-        await InitializeConsumers(stoppingToken);
+    private async Task Initialize(CancellationToken ct = default)
+    {
+        await connectionService.ConnectWithRetriesAsync(client, ct);
+        var configurator = new CatalogManagementServiceConfigurator(client);
+        await configurator.ConfigureAsync(ct);
+        
+        await InitializeConsumers(ct);
     }
 
     private async Task InitializeConsumers(CancellationToken ct = default)
