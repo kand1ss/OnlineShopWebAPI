@@ -1,4 +1,5 @@
 using CatalogManagementService.Application.Consumers;
+using CatalogManagementService.Application.DTO;
 using CatalogService.Domain;
 using Core;
 using Core.Contracts;
@@ -23,25 +24,26 @@ public class CatalogManagementService(IRabbitMQClient client, IServiceScopeFacto
 
     private async Task InitializeConsumers(CancellationToken ct = default)
     {
-        var deserializer = new ProductDTODeserializer();
+        var createRequestDeserializer = new CreateProductRequestDeserializer();
+        var updateRequestDeserializer = new UpdateProductRequestDeserializer();
+        var removeRequestDeserializer = new RemoveProductRequestDeserializer();
 
-        await RegisterConsumer<CreateProductRequestProcessor>(deserializer,
+        await RegisterConsumer<CreateProductRequest>(createRequestDeserializer,
             GlobalQueues.CreateProduct, GlobalRoutingKeys.ProductCreated, ct);
-        await RegisterConsumer<UpdateProductRequestProcessor>(deserializer,
+        await RegisterConsumer<UpdateProductRequest>(updateRequestDeserializer,
             GlobalQueues.UpdateProduct, GlobalRoutingKeys.ProductUpdated, ct);
-        await RegisterConsumer<RemoveProductRequestProcessor>(deserializer,
+        await RegisterConsumer<Guid>(removeRequestDeserializer,
             GlobalQueues.RemoveProduct, GlobalRoutingKeys.ProductRemoved, ct);
     }
 
-    private async Task RegisterConsumer<TProcessor>(
-        IMessageDeserializer<string, ProductDTO> deserializer,
+    private async Task RegisterConsumer<TRequest>(
+        IMessageDeserializer<string, TRequest> deserializer,
         string consumeQueue,
         string publishRoutingKey,
         CancellationToken ct = default) 
-        where TProcessor : IRequestProcessor<ProductDTO, Product>
     {
         var consumer = new AsyncEventingBasicConsumer(client.Channel);
-        var messageConsumer = new ProcessingAndPublishingMessageConsumer<TProcessor>(client, scopeFactory, deserializer, 
+        var messageConsumer = new ProcessingAndPublishingMessageConsumer<TRequest>(client, scopeFactory, deserializer, 
             publishRoutingKey);
         
         consumer.ReceivedAsync += messageConsumer.ProcessConsumeAsync;

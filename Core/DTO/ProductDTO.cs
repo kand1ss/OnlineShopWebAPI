@@ -3,11 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Core.DTO;
 
 public record ProductDTO(
-    [MaxLength(100)]
-    [MinLength(10)]
-    [Required]
+    Guid Id,
     string Title,
-    [MaxLength(2500)]
     string? Description,
-    [Required]
     decimal Price);

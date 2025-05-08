@@ -1,3 +1,4 @@
+using CatalogManagementService.Application.DTO;
 using Core;
 using Core.Contracts;
 using Core.DTO;
@@ -8,9 +9,9 @@ public static class ApplicationExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<IRequestProcessor<ProductDTO, Product>, CreateProductRequestProcessor>();
-        services.AddScoped<IRequestProcessor<ProductDTO, Product>, UpdateProductRequestProcessor>();
-        services.AddScoped<IRequestProcessor<ProductDTO, Product>, RemoveProductRequestProcessor>();
+        services.AddScoped<IRequestProcessor<CreateProductRequest, Product>, CreateProductRequestProcessor>();
+        services.AddScoped<IRequestProcessor<UpdateProductRequest, Product>, UpdateProductRequestProcessor>();
+        services.AddScoped<IRequestProcessor<Guid, Product>, RemoveProductRequestProcessor>();
         
         return services;
     }

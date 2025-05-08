@@ -5,7 +5,7 @@ namespace CatalogManagementService.tests;
 
 public class TestWhichUsingInMemoryDb
 {
-    protected CatalogDbContext _context;
+    protected readonly CatalogDbContext Context;
 
     public TestWhichUsingInMemoryDb()
     {
@@ -13,6 +13,6 @@ public class TestWhichUsingInMemoryDb
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _context = new CatalogDbContext(options);
+        Context = new CatalogDbContext(options);
     }
 }
