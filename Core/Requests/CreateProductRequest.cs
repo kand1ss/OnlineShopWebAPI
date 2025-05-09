@@ -1,6 +1,7 @@
+
 namespace CatalogManagementService.Application.DTO;
 
-public record CreateProductRequest(
-    string Title,
-    string? Description,
-    decimal Price) : ProductRequest(Title, Description, Price);
+public class CreateProductRequest(
+    string title,
+    string? description,
+    decimal price) : ProductRequest(title, description, price);

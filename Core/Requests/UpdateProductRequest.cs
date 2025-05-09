@@ -1,8 +1,11 @@
 
 namespace CatalogManagementService.Application.DTO;
 
-public record UpdateProductRequest(
-    Guid Id,
-    string Title,
-    string? Description,
-    decimal Price) : ProductRequest(Title, Description, Price);
+public class UpdateProductRequest(
+    Guid id,
+    string title,
+    string? description,
+    decimal price) : ProductRequest(title, description, price)
+{
+    public Guid Id { get; init; } = id;
+}

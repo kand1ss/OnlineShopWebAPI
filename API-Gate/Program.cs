@@ -1,4 +1,5 @@
 using APIGate.Application.Deserializers;
+using APIGate.Application.Validators;
 using APIGate.Hosted;
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;
@@ -11,6 +12,7 @@ builder.Services.AddSingleton<IConnectionService, RabbitMQConnectionService>();
 builder.Services.AddSingleton<IRabbitMQClient, RabbitMQClient.RabbitMQClient>();
 builder.Services.AddSingleton<IMessageDeserializer<byte[], ProductOperationReply>, ProductReplyDeserializer>();
 builder.Services.AddHostedService<RabbitMQInitializer>();
+builder.Services.AddSingleton<ProductRequestValidator>();
 builder.Services.AddGrpc();
 
 var app = builder.Build();

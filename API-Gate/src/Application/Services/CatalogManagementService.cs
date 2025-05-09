@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using API_Gate;
+using APIGate.Application.Validators;
 using APIGate.Consumers;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Application.Replies;
@@ -15,27 +16,49 @@ namespace APIGate.Services;
 
 public class CatalogManagementService(
     IRabbitMQClient client,
-    IMessageDeserializer<byte[], ProductOperationReply> replyDeserializer) 
+    IMessageDeserializer<byte[], ProductOperationReply> replyDeserializer,
+    ProductRequestValidator validator) 
     : API_Gate.CatalogManagementService.CatalogManagementServiceBase
 {
     private readonly string _replyQueue = GlobalQueues.ProductOperationReply;
     
     public override async Task<ProductReply> CreateProduct(CreateProductData request, ServerCallContext context)
     {
-        var parseResult = decimal.TryParse(request.Price, out var price);
-        if (!parseResult)
-            return CreateReply("Price must be a valid decimal number", false);
+        if (!TryParseDecimal(request.Price, out var price, out var error))
+            return CreateReply(error, false);
         
         var requestData = new CreateProductRequest(request.Title, request.Description, price);
-        var body = GetBytesFrom(requestData);
+        var validationResult = TryValidate(requestData, out var reply);
+        if (!validationResult)
+            return reply!;
         
+        var body = GetBytesFrom(requestData);
         return await PublishMessageAndConsumeReply(body, GlobalQueues.CreateProduct);
+    }
+    
+    private static bool TryParseDecimal(string? value, out decimal result, out string error)
+    {
+        if (decimal.TryParse(value, out result))
+        {
+            error = "";
+            return true;
+        }
+
+        error = "Price must be a valid decimal number";
+        return false;
+    }
+    
+    private bool TryValidate<T>(T request, out ProductReply? reply)
+    {
+        var result = validator.Validate(request, out var errors);
+        reply = CreateReply(string.Join("; ", errors), result);
+
+        return result;
     }
 
     private async Task<ProductReply> PublishMessageAndConsumeReply(byte[] body, string publishRoutingKey)
     {
         var reply = CreateReply("No response was received", false);
-        
         var generatedId = Guid.NewGuid().ToString();
         var props = CreateBasicProperties(generatedId);
 
@@ -44,14 +67,17 @@ public class CatalogManagementService(
         var tcs = new TaskCompletionSource<ProductReply>(TaskCreationOptions.RunContinuationsAsynchronously);
         var consumer = new AsyncEventingBasicConsumer(client.Channel);
         var replyConsumer = new ProductReplyConsumer(client, replyDeserializer, generatedId, tcs);
-        consumer.ReceivedAsync += replyConsumer.ProcessConsumeAsync;
         
+        consumer.ReceivedAsync += replyConsumer.ProcessConsumeAsync;
         await client.Channel.BasicConsumeAsync(_replyQueue, false, consumer);
+        
         var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(15)));
         if (completedTask == tcs.Task)
             reply = tcs.Task.Result;
         
-        await client.Channel.BasicCancelAsync(consumer.ConsumerTags.First());
+        if (consumer.ConsumerTags.Length > 0)
+            await client.Channel.BasicCancelAsync(consumer.ConsumerTags.First());
+        
         return reply;
     }
 
@@ -76,13 +102,15 @@ public class CatalogManagementService(
 
     public override async Task<ProductReply> UpdateProduct(UpdateProductData request, ServerCallContext context)
     {
-        var parseResult = decimal.TryParse(request.Price, out var price);
-        if (!parseResult)
-            return CreateReply("Price must be a valid decimal number", false);
+        if (!TryParseDecimal(request.Price, out var price, out var error))
+            return CreateReply(error, false);
         
         var requestData = new UpdateProductRequest(Guid.Parse(request.Id), request.Title, request.Description, price);
-        var body = GetBytesFrom(requestData);
+        var validationResult = TryValidate(requestData, out var reply);
+        if (!validationResult)
+            return reply!;
         
+        var body = GetBytesFrom(requestData);
         return await PublishMessageAndConsumeReply(body, GlobalQueues.UpdateProduct);
     }
 

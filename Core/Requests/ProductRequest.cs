@@ -2,12 +2,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CatalogManagementService.Application.DTO;
 
-public record ProductRequest(
+public class ProductRequest(string title, string? description, decimal price)
+{
     [MaxLength(100)]
-    [MinLength(10)]
+    [MinLength(5)]
     [Required]
-    string Title,
+    public string Title { get; init; } = title;
+
     [MaxLength(2500)]
-    string? Description,
-    [Required]
-    decimal Price);
+    public string? Description { get; init; } = description;
+
+    [Required] public decimal Price { get; init; } = price;
+}
