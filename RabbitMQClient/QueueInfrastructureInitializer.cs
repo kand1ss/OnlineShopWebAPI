@@ -18,7 +18,7 @@ public class QueueInfrastructureInitializer(IRabbitMQClient client) : IRabbitMQC
         await client.Channel.QueueDeclareAsync(GlobalQueues.ProductRemoved, true, false, 
             cancellationToken: ct);
         await client.Channel.QueueDeclareAsync(GlobalQueues.ProductOperationReply, true, false, 
-            cancellationToken: ct);
+            autoDelete: false, cancellationToken: ct);
         
         await client.Channel.QueueBindAsync(GlobalQueues.ProductCreated, GlobalExchanges.Products, 
             GlobalRoutingKeys.ProductCreated, cancellationToken: ct);

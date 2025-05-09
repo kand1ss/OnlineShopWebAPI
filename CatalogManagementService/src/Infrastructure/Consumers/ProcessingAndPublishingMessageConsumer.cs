@@ -39,7 +39,7 @@ public class ProcessingAndPublishingMessageConsumer<TRequest>(
         
         await OnProcessed(product);
         await client.Channel.BasicAckAsync(ea.DeliveryTag, false);
-        await SendReply(ea.BasicProperties, new ProductOperationReply("Product successfully created", true));
+        await SendReply(ea.BasicProperties, new ProductOperationReply("The request was successfully processed", true));
     }
 
     private async Task OnProcessed(Product product)
