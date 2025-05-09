@@ -1,8 +1,8 @@
-using System.ComponentModel.DataAnnotations;
 
 namespace CatalogManagementService.Application.DTO;
 
-public record CreateProductRequest(
+public record UpdateProductRequest(
+    Guid Id,
     string Title,
     string? Description,
     decimal Price) : ProductRequest(Title, Description, Price);

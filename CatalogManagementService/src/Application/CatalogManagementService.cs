@@ -29,7 +29,7 @@ public class CatalogManagementService(IRabbitMQClient client, IConnectionService
     private async Task Initialize(CancellationToken ct = default)
     {
         await connectionService.ConnectWithRetriesAsync(client, ct);
-        var configurator = new CatalogManagementServiceConfigurator(client);
+        var configurator = new QueueInfrastructureInitializer(client);
         await configurator.ConfigureAsync(ct);
         
         await InitializeConsumers(ct);
