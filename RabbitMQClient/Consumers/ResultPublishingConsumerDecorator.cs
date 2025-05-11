@@ -28,8 +28,15 @@ public class ResultPublishingConsumerDecorator<TReply>(
     
     public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
     {
-        consumer.OnProcessed += PublishResult;
-        await consumer.ProcessConsumeAsync(model, ea);
+        try
+        {
+            consumer.OnProcessed += PublishResult;
+            await consumer.ProcessConsumeAsync(model, ea);
+        }
+        finally
+        {
+            consumer.OnProcessed -= PublishResult;
+        }
     }
     
     private async Task PublishResult(TReply reply)

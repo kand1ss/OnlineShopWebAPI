@@ -22,20 +22,25 @@ public class ReplyPublishingMessageConsumerDecorator<TReply>(
     
     public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
     {
+        async Task OnConsumerOnProcessed(TReply reply)
+        {
+            await SendReply(ea.BasicProperties, RequestReply<TReply>.Ok(reply));
+            OnProcessed?.Invoke(reply);
+        }
+
         try
         {
-            consumer.OnProcessed += async reply =>
-            {
-                await SendReply(ea.BasicProperties, RequestReply<TReply>.Ok(reply));
-                OnProcessed?.Invoke(reply);
-            };
-            
+            consumer.OnProcessed += OnConsumerOnProcessed;
             await consumer.ProcessConsumeAsync(model, ea);
         }
         catch (Exception e)
         {
             await SendReply(ea.BasicProperties, RequestReply<TReply>.Fail(e.Message));
             throw;
+        }
+        finally
+        {
+            consumer.OnProcessed -= OnConsumerOnProcessed;
         }
     }
     
