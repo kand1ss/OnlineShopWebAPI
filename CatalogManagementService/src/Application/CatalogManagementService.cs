@@ -58,7 +58,7 @@ public class CatalogManagementService(
         var messageHandler = 
             new MessageHandlerConsumer<TRequest, ProductDTO>(client, scopeFactory, deserializer);
         var consumerResultPublisher =
-            new ResultPublishingConsumerDecorator<ProductDTO>(client, messageHandler, publishRoutingKey);
+            new ResultPublishingConsumerDecorator<ProductDTO>(client, messageHandler, publishRoutingKey, GlobalExchanges.Products);
         var consumerReplyPublisher = 
             new ReplyPublishingMessageConsumerDecorator<ProductDTO>(client, consumerResultPublisher);
         
