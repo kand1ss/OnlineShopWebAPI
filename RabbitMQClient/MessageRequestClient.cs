@@ -1,6 +1,7 @@
 using APIGate.Consumers;
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQClient;
@@ -16,9 +17,13 @@ namespace APIGate.Application;
 /// <typeparam name="TReplyResult">The type of the reply result expected to be deserialized from the consumed message.</typeparam>
 public class MessageRequestClient<TReplyResult>(
     IRabbitMQClient client,
-    IMessageDeserializer<byte[], RequestReply<TReplyResult>> replyDeserializer
+    IMessageDeserializer<byte[], RequestReply<TReplyResult>> replyDeserializer,
+    ILogger<MessageRequestClient<TReplyResult>> logger
     ) : IMessageRequestClient<TReplyResult>
 {
+    private readonly TimeSpan _defaultReplyTimeout = TimeSpan.FromSeconds(15);
+    
+    
     /// Publishes a message to the specified routing key and waits for a corresponding reply message from the reply queue.
     /// <param name="body">The message body to be published.</param>
     /// <param name="publishRoutingKey">The routing key used to publish the message.</param>
@@ -28,9 +33,27 @@ public class MessageRequestClient<TReplyResult>(
     public async Task<RequestReply<TReplyResult>> PublishMessageAndConsumeReply(byte[] body, string publishRoutingKey, string replyQueue)
     {
         var generatedId = Guid.NewGuid().ToString();
+        try
+        {
+            return await TryPublishMessageAndConsumeReply(body, generatedId, publishRoutingKey, replyQueue);
+        }
+        catch (Exception e)
+        {
+            logger.LogError($"[{generatedId}] Error publishing message to queue '{publishRoutingKey}': '{e.Message}'");
+            return RequestReply<TReplyResult>.Fail(e.Message);
+        }
+    }
+
+    private async Task<RequestReply<TReplyResult>> TryPublishMessageAndConsumeReply(byte[] body, string generatedId, string publishRoutingKey, string replyQueue)
+    {
         var props = CreateBasicProperties(generatedId, replyQueue);
+        
+        logger.LogInformation(
+            $"[{generatedId}] Requested to publish a message to queue '{publishRoutingKey}' with the response returned in queue '{replyQueue}'");
 
         await client.Channel.BasicPublishAsync("", publishRoutingKey, true, props, body);
+        
+        logger.LogInformation($"[{generatedId}] Message published to queue '{publishRoutingKey}'");
         
         var tcs = new TaskCompletionSource<RequestReply<TReplyResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
         var consumer = new AsyncEventingBasicConsumer(client.Channel);
@@ -39,17 +62,20 @@ public class MessageRequestClient<TReplyResult>(
         consumer.ReceivedAsync += replyConsumer.ProcessConsumeAsync;
         await client.Channel.BasicConsumeAsync(replyQueue, false, consumer);
         
-        var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(15)));
+        var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(_defaultReplyTimeout));
         if (completedTask == tcs.Task)
         {
             if (consumer.ConsumerTags.Length > 0)
                 await client.Channel.BasicCancelAsync(consumer.ConsumerTags.First());
+            
+            logger.LogInformation($"[{generatedId}] Reply received from queue '{replyQueue}' within the defined timeout period.");
             return tcs.Task.Result;
         }
 
-        throw new TimeoutException("Response timeout exceeded");
+        logger.LogWarning($"[{generatedId}] No reply received from queue '{replyQueue}' within the defined timeout period.");
+        return RequestReply<TReplyResult>.Fail("No response was received within the defined timeout period.");
     }
-    
+
     private BasicProperties CreateBasicProperties(string generatedId, string replyQueue)
     {
         return new BasicProperties

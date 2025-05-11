@@ -17,11 +17,13 @@ public class CatalogManagementService(
     MessageRequestClient<ProductDTO> messageRequestClient,
     IMessageDeserializer<CreateProductRequest, byte[]> createRequestDeserializer,
     IMessageDeserializer<UpdateProductRequest, byte[]> updateRequestDeserializer,
-    ProductRequestValidator validator) 
+    ProductRequestValidator validator,
+    ILogger<CatalogManagementService> logger) 
     : API_Gate.CatalogManagementService.CatalogManagementServiceBase
 {
     public override async Task<ProductReply> CreateProduct(CreateProductData request, ServerCallContext context)
     {
+        logger.LogInformation("CREATE: Received a request to create a product.");
         if (!ProductRequestParser.TryParseDecimal(request.Price, out var price, out var error))
             return CreateReply(false, "", error);
         
@@ -31,6 +33,8 @@ public class CatalogManagementService(
             return reply!;
         
         var body = createRequestDeserializer.Deserialize(requestData);
+        logger.LogInformation("CREATE: The request was successfully deserialized.");
+        
         var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
             GlobalQueues.CreateProduct, GlobalQueues.ProductOperationReply);
 
@@ -59,6 +63,7 @@ public class CatalogManagementService(
 
     public override async Task<ProductReply> UpdateProduct(UpdateProductData request, ServerCallContext context)
     {
+        logger.LogInformation("UPDATE: Received a request to update a product.");
         if (!ProductRequestParser.TryParseDecimal(request.Price, out var price, out var error)
             || !ProductRequestParser.TryParseGuid(request.Id, out var guid, out error))
             return CreateReply(false, "", error);
@@ -69,6 +74,8 @@ public class CatalogManagementService(
             return reply!;
 
         var body = updateRequestDeserializer.Deserialize(requestData);
+        logger.LogInformation("UPDATE: The request was successfully deserialized.");
+        
         var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
             GlobalQueues.UpdateProduct, GlobalQueues.ProductOperationReply);
 
@@ -77,6 +84,7 @@ public class CatalogManagementService(
 
     public override async Task<ProductReply> RemoveProduct(RemoveProductData request, ServerCallContext context)
     {
+        logger.LogInformation("REMOVE: Received a request to remove a product.");
         if(!ProductRequestParser.TryParseGuid(request.Id, out var guid, out var error))
             return CreateReply(false, "", error);
         
