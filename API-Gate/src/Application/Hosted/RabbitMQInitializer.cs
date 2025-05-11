@@ -8,8 +8,6 @@ public class RabbitMQInitializer(IConnectionService connectionService, IRabbitMQ
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await connectionService.ConnectWithRetriesAsync(client, cancellationToken);
-        var configurator = new QueueInfrastructureInitializer(client);
-        await configurator.ConfigureAsync(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

@@ -6,9 +6,9 @@ using Core.DTO;
 namespace CatalogManagementService.Application;
 
 public class RemoveProductRequestProcessor(IProductRepository repository, ILogger<RemoveProductRequestProcessor> logger) 
-    : IRequestProcessor<Guid, Product>
+    : IRequestProcessor<Guid, ProductDTO>
 {
-    public async Task<Product> Process(Guid data)
+    public async Task<ProductDTO> Process(Guid data)
     {
         var product = await repository.GetAsync(data);
         if (product is null)
@@ -17,6 +17,6 @@ public class RemoveProductRequestProcessor(IProductRepository repository, ILogge
         await repository.DeleteAsync(product);
         
         logger.LogInformation($"Product with id '{product.Id}' removed.");
-        return product;
+        return product.ToDTO();
     }
 }

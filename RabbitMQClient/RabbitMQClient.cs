@@ -20,6 +20,9 @@ public class RabbitMQClient : IRabbitMQClient, IDisposable, IAsyncDisposable
 
         _connection = await connectionFactory.CreateConnectionAsync(ct);
         _channel = await _connection.CreateChannelAsync(cancellationToken: ct);
+
+        var configurator = new QueueInfrastructureInitializer(this);
+        await configurator.ConfigureAsync(ct);
     }
 
     public async Task CloseConnectionAsync(CancellationToken ct = default)

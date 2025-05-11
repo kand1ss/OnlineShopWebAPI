@@ -3,14 +3,15 @@ using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Infrastructure.Repositories;
 using Core;
 using Core.Contracts;
+using Core.DTO;
 
 namespace CatalogManagementService.Application;
 
 public class CreateProductRequestProcessor(
     IProductRepository repository, ILogger<CreateProductRequestProcessor> logger) 
-    : IRequestProcessor<CreateProductRequest, Product>
+    : IRequestProcessor<CreateProductRequest, ProductDTO>
 {
-    public async Task<Product> Process(CreateProductRequest data)
+    public async Task<ProductDTO> Process(CreateProductRequest data)
     {
         var product = new Product
         {
@@ -23,6 +24,6 @@ public class CreateProductRequestProcessor(
         await repository.CreateAsync(product);
         
         logger.LogInformation($"Product with id '{product.Id}' created.");
-        return product;
+        return product.ToDTO();
     }
 }

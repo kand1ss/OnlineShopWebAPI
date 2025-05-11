@@ -7,9 +7,9 @@ using Core.DTO;
 namespace CatalogManagementService.Application;
 
 public class UpdateProductRequestProcessor(IProductRepository repository, ILogger<UpdateProductRequestProcessor> logger) 
-    : IRequestProcessor<UpdateProductRequest, Product>
+    : IRequestProcessor<UpdateProductRequest, ProductDTO>
 {
-    public async Task<Product> Process(UpdateProductRequest data)
+    public async Task<ProductDTO> Process(UpdateProductRequest data)
     {
         var product = await repository.GetAsync(data.Id);
         if (product is null)
@@ -22,6 +22,6 @@ public class UpdateProductRequestProcessor(IProductRepository repository, ILogge
         await repository.UpdateAsync(product);
         
         logger.LogInformation($"Product with id '{product.Id}' updated.");
-        return product;
+        return product.ToDTO();
     }
 }

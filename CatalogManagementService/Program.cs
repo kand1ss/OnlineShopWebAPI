@@ -5,7 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplication();
+builder.Services.InitializeRequestDeserializers();
+builder.Services.InitializeRequestProcessors();
+builder.Services.InitializeRabbitMQ();
 builder.Services.AddHostedService<CatalogManagementService.Application.CatalogManagementService>();
 
 var app = builder.Build();

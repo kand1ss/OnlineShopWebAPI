@@ -1,4 +1,3 @@
-using API_Gate;
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;
 using RabbitMQ.Client.Events;
@@ -7,11 +6,15 @@ using RabbitMQClient.Contracts;
 
 namespace APIGate.Consumers;
 
-public class ProductReplyConsumer(
+/// <summary>
+/// Handles the consumption of messages from a RabbitMQ queue for request-reply messaging.
+/// </summary>
+/// <typeparam name="TReplyResult">The type of the reply message being processed.</typeparam>
+public class ReplyConsumer<TReplyResult>(
     IRabbitMQClient client,
-    IMessageDeserializer<byte[], ProductOperationReply> deserializer,
+    IMessageDeserializer<byte[], RequestReply<TReplyResult>> deserializer,
     string expectedId,
-    TaskCompletionSource<ProductReply> tcs) : IMessageConsumer
+    TaskCompletionSource<RequestReply<TReplyResult>> tcs) : IMessageConsumer
 {
     public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
     {
@@ -19,8 +22,7 @@ public class ProductReplyConsumer(
             return;
         
         var data = deserializer.Deserialize(ea.Body.ToArray());
-
-        tcs.SetResult(new ProductReply { Message = data.Message, Success = data.Success });
+        tcs.SetResult(data);
         await client.Channel.BasicAckAsync(ea.DeliveryTag, false);
     }
 }

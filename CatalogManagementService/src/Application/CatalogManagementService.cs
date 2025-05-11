@@ -1,17 +1,22 @@
-using CatalogManagementService.Application.Consumers;
 using CatalogManagementService.Application.DTO;
 using CatalogService.Domain;
 using Core;
 using Core.Contracts;
+using Core.DTO;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQClient;
+using RabbitMQClient.Consumers;
 using RabbitMQClient.Contracts;
 
 namespace CatalogManagementService.Application;
 
-public class CatalogManagementService(IRabbitMQClient client, IConnectionService connectionService, 
-    IServiceScopeFactory scopeFactory, ILogger<CatalogManagementService> logger) 
+public class CatalogManagementService(
+    IRabbitMQClient client, IConnectionService connectionService, IServiceScopeFactory scopeFactory,
+    IMessageDeserializer<byte[], CreateProductRequest> createRequestDeserializer,
+    IMessageDeserializer<byte[], UpdateProductRequest> updateRequestDeserializer,
+    IMessageDeserializer<byte[], Guid> removeRequestDeserializer,
+    ILogger<CatalogManagementService> logger) 
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,18 +34,11 @@ public class CatalogManagementService(IRabbitMQClient client, IConnectionService
     private async Task Initialize(CancellationToken ct = default)
     {
         await connectionService.ConnectWithRetriesAsync(client, ct);
-        var configurator = new QueueInfrastructureInitializer(client);
-        await configurator.ConfigureAsync(ct);
-        
         await InitializeConsumers(ct);
     }
 
     private async Task InitializeConsumers(CancellationToken ct = default)
     {
-        var createRequestDeserializer = new CreateProductRequestDeserializer();
-        var updateRequestDeserializer = new UpdateProductRequestDeserializer();
-        var removeRequestDeserializer = new RemoveProductRequestDeserializer();
-
         await RegisterConsumer<CreateProductRequest>(createRequestDeserializer,
             GlobalQueues.CreateProduct, GlobalRoutingKeys.ProductCreated, ct);
         await RegisterConsumer<UpdateProductRequest>(updateRequestDeserializer,
@@ -56,10 +54,15 @@ public class CatalogManagementService(IRabbitMQClient client, IConnectionService
         CancellationToken ct = default) 
     {
         var consumer = new AsyncEventingBasicConsumer(client.Channel);
-        var messageConsumer = new ProcessingAndPublishingMessageConsumer<TRequest>(client, scopeFactory, deserializer, 
-            publishRoutingKey);
+
+        var messageHandler = 
+            new MessageHandlerConsumer<TRequest, ProductDTO>(client, scopeFactory, deserializer);
+        var consumerResultPublisher =
+            new ResultPublishingConsumerDecorator<ProductDTO>(client, messageHandler, publishRoutingKey);
+        var consumerReplyPublisher = 
+            new ReplyPublishingMessageConsumerDecorator<ProductDTO>(client, consumerResultPublisher);
         
-        consumer.ReceivedAsync += messageConsumer.ProcessConsumeAsync;
+        consumer.ReceivedAsync += consumerReplyPublisher.ProcessConsumeAsync;
         await client.Channel.BasicConsumeAsync(consumeQueue, false, consumer, cancellationToken: ct);
     }
 
