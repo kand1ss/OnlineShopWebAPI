@@ -1,6 +1,6 @@
-using API_Gate;
 using APIGate.Application.Deserializers;
 using APIGate.Hosted;
+using CatalogManagementService.Application;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;
@@ -23,9 +23,10 @@ public static class ApplicationExtensions
     
     public static IServiceCollection AddDeserializers(this IServiceCollection services)
     {
-        services.AddSingleton<IMessageDeserializer<byte[], RequestReply<ProductDTO>>, ProductReplyDeserializer>();
-        services.AddSingleton<IMessageDeserializer<UpdateProductRequest, byte[]>, ProductRequestSerializer<UpdateProductRequest>>(); 
-        services.AddSingleton<IMessageDeserializer<CreateProductRequest, byte[]>, ProductRequestSerializer<CreateProductRequest>>();
+        services.AddSingleton<IMessageDeserializer<byte[], RequestReply<ProductDTO>>, RequestDeserializer<RequestReply<ProductDTO>>>();
+        services.AddSingleton<IMessageSerializer<UpdateProductRequest, byte[]>, RequestSerializer<UpdateProductRequest>>(); 
+        services.AddSingleton<IMessageSerializer<CreateProductRequest, byte[]>, RequestSerializer<CreateProductRequest>>();
+        services.AddSingleton<IMessageSerializer<RemoveProductRequest, byte[]>, RequestSerializer<RemoveProductRequest>>();
         return services;
     }
 }

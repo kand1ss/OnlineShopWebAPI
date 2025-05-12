@@ -15,7 +15,7 @@ public class CatalogManagementService(
     IRabbitMQClient client, IConnectionService connectionService, IServiceScopeFactory scopeFactory,
     IMessageDeserializer<byte[], CreateProductRequest> createRequestDeserializer,
     IMessageDeserializer<byte[], UpdateProductRequest> updateRequestDeserializer,
-    IMessageDeserializer<byte[], Guid> removeRequestDeserializer,
+    IMessageDeserializer<byte[], RemoveProductRequest> removeRequestDeserializer,
     ILogger<CatalogManagementService> logger) 
     : BackgroundService
 {
@@ -43,7 +43,7 @@ public class CatalogManagementService(
             GlobalQueues.CreateProduct, GlobalRoutingKeys.ProductCreated, ct);
         await RegisterConsumer<UpdateProductRequest>(updateRequestDeserializer,
             GlobalQueues.UpdateProduct, GlobalRoutingKeys.ProductUpdated, ct);
-        await RegisterConsumer<Guid>(removeRequestDeserializer,
+        await RegisterConsumer<RemoveProductRequest>(removeRequestDeserializer,
             GlobalQueues.RemoveProduct, GlobalRoutingKeys.ProductRemoved, ct);
     }
 

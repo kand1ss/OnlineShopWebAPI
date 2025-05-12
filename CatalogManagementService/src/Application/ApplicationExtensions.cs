@@ -1,5 +1,4 @@
 using CatalogManagementService.Application.DTO;
-using Core;
 using Core.Contracts;
 using Core.DTO;
 using RabbitMQClient;
@@ -11,9 +10,9 @@ public static class ApplicationExtensions
 {
     public static IServiceCollection InitializeRequestDeserializers(this IServiceCollection services)
     {
-        services.AddSingleton<IMessageDeserializer<byte[], CreateProductRequest>, CreateProductRequestDeserializer>();
-        services.AddSingleton<IMessageDeserializer<byte[], UpdateProductRequest>, UpdateProductRequestDeserializer>();
-        services.AddSingleton<IMessageDeserializer<byte[], Guid>, RemoveProductRequestDeserializer>();
+        services.AddSingleton<IMessageDeserializer<byte[], CreateProductRequest>, RequestDeserializer<CreateProductRequest>>();
+        services.AddSingleton<IMessageDeserializer<byte[], UpdateProductRequest>, RequestDeserializer<UpdateProductRequest>>();
+        services.AddSingleton<IMessageDeserializer<byte[], RemoveProductRequest>, RequestDeserializer<RemoveProductRequest>>();
 
         return services;
     }
@@ -22,7 +21,7 @@ public static class ApplicationExtensions
     {
         services.AddScoped<IRequestProcessor<CreateProductRequest, ProductDTO>, CreateProductRequestProcessor>();
         services.AddScoped<IRequestProcessor<UpdateProductRequest, ProductDTO>, UpdateProductRequestProcessor>();
-        services.AddScoped<IRequestProcessor<Guid, ProductDTO>, RemoveProductRequestProcessor>();
+        services.AddScoped<IRequestProcessor<RemoveProductRequest, ProductDTO>, RemoveProductRequestProcessor>();
 
         return services;
     }

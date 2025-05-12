@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using API_Gate;
 using APIGate.Application;
@@ -15,8 +14,9 @@ namespace APIGate.Services;
 
 public class CatalogManagementService(
     MessageRequestClient<ProductDTO> messageRequestClient,
-    IMessageDeserializer<CreateProductRequest, byte[]> createRequestDeserializer,
-    IMessageDeserializer<UpdateProductRequest, byte[]> updateRequestDeserializer,
+    IMessageSerializer<CreateProductRequest, byte[]> createRequestSerializer,
+    IMessageSerializer<UpdateProductRequest, byte[]> updateRequestSerializer,
+    IMessageSerializer<RemoveProductRequest, byte[]> removeRequestSerializer,
     ProductRequestValidator validator,
     ILogger<CatalogManagementService> logger) 
     : API_Gate.CatalogManagementService.CatalogManagementServiceBase
@@ -32,7 +32,7 @@ public class CatalogManagementService(
         if (!validationResult)
             return reply!;
         
-        var body = createRequestDeserializer.Deserialize(requestData);
+        var body = createRequestSerializer.Serialize(requestData);
         logger.LogInformation("CREATE: The request was successfully deserialized.");
         
         var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
@@ -73,7 +73,7 @@ public class CatalogManagementService(
         if (!validationResult)
             return reply!;
 
-        var body = updateRequestDeserializer.Deserialize(requestData);
+        var body = updateRequestSerializer.Serialize(requestData);
         logger.LogInformation("UPDATE: The request was successfully deserialized.");
         
         var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
@@ -88,7 +88,8 @@ public class CatalogManagementService(
         if(!ProductRequestParser.TryParseGuid(request.Id, out var guid, out var error))
             return CreateReply(false, "", error);
         
-        var body = Encoding.UTF8.GetBytes(request.Id);
+        var requestData = new RemoveProductRequest(guid);
+        var body = removeRequestSerializer.Serialize(requestData);
         var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
             GlobalQueues.RemoveProduct, GlobalQueues.ProductOperationReply);
 

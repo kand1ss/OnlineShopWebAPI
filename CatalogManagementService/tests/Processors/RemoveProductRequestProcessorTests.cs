@@ -1,4 +1,5 @@
 using CatalogManagementService.Application;
+using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Infrastructure;
 using Core;
 using Moq;
@@ -29,9 +30,11 @@ public class RemoveProductRequestProcessorTests : TestWhichUsingInMemoryDb
             Description = null,
             Price = 100,
         };
+
+        var request = new RemoveProductRequest(product.Id);
         
         await _repository.CreateAsync(product);
-        await _processor.Process(product.Id);
+        await _processor.Process(request);
         
         Assert.Empty(await _repository.GetAllAsync());
         Assert.Null(await _repository.GetAsync(product.Id));
@@ -40,6 +43,7 @@ public class RemoveProductRequestProcessorTests : TestWhichUsingInMemoryDb
     [Fact]
     public async Task Process_NonExistingProduct_ThrowsException()
     {
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _processor.Process(Guid.NewGuid()));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _processor.Process(new RemoveProductRequest(Guid.NewGuid())));
     }
 }

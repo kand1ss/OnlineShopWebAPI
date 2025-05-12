@@ -2,14 +2,13 @@ using System.Text;
 using System.Text.Json;
 using CatalogManagementService.Application;
 using CatalogManagementService.Application.DTO;
-using Core.DTO;
 using Xunit;
 
 namespace CatalogManagementService.tests.Deserializers;
 
-public class CreateProductRequestDeserializerTests
+public class ProductRequestDeserializerTests
 {
-    private readonly CreateProductRequestDeserializer _deserializer = new();
+    private readonly RequestDeserializer<CreateProductRequest> _deserializer = new();
     
     [Theory]
     [InlineData("product", null, 100)]
