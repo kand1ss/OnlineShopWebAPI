@@ -6,7 +6,7 @@ using Xunit;
 
 namespace CatalogManagementService.tests.Deserializers;
 
-public class ProductRequestDeserializerTests
+public class RequestDeserializerTests
 {
     private readonly RequestDeserializer<CreateProductRequest> _deserializer = new();
     
