@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.InitializeRabbitMQ();
 builder.Services.AddDeserializers();
 builder.Services.AddSingleton<MessageRequestClient<ProductDTO>>();
-builder.Services.AddSingleton<ProductRequestValidator>();
+builder.Services.AddSingleton<RequestValidator>();
 builder.Services.AddGrpc();
 
 var app = builder.Build();

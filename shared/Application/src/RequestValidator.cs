@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace APIGate.Application.Validators;
 
-public class ProductRequestValidator
+public class RequestValidator
 {
     public bool Validate<T>(T model, out IEnumerable<string> errors)
     {

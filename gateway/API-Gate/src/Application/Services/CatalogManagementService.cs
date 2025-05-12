@@ -17,7 +17,7 @@ public class CatalogManagementService(
     IMessageSerializer<CreateProductRequest, byte[]> createRequestSerializer,
     IMessageSerializer<UpdateProductRequest, byte[]> updateRequestSerializer,
     IMessageSerializer<RemoveProductRequest, byte[]> removeRequestSerializer,
-    ProductRequestValidator validator,
+    RequestValidator validator,
     ILogger<CatalogManagementService> logger)
     : API_Gate.CatalogManagementService.CatalogManagementServiceBase
 {
@@ -39,7 +39,7 @@ public class CatalogManagementService(
 
     private async Task<ProductReply> TryCreateProduct(CreateProductData request)
     {
-        logger.LogInformation("CREATE: Received a request to create a product.");
+        logger.LogInformation($"{nameof(CreateProductData)}: Received a request to create a product.");
         if (!ProductRequestParser.TryParseDecimal(request.Price, out var price, out var error))
             return CreateReply(false, "", error);
         
@@ -70,6 +70,11 @@ public class CatalogManagementService(
     {
         var result = validator.Validate(request, out var errors);
         reply = CreateReply(result, "", string.Join("; ", errors));
+        
+        if (!result)
+            logger.LogWarning($"{typeof(T).Name}: The request was not validated successfully.");
+        else
+            logger.LogInformation($"{typeof(T).Name}: The request was validated successfully.");
 
         return result;
     }
