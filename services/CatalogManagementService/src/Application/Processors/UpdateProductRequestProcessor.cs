@@ -14,9 +14,12 @@ public class UpdateProductRequestProcessor(IProductRepository repository, ILogge
         if (product is null)
             throw new InvalidOperationException($"UPDATE: Product with id '{data.Id}' not found.");
         
-        product.Title = data.Title;
-        product.Description = data.Description;
-        product.Price = data.Price;
+        if (!string.IsNullOrEmpty(data.Title))
+            product.Title = data.Title;
+        if (!string.IsNullOrEmpty(data.Description))
+            product.Description = data.Description;
+        if (data.Price > 0)
+            product.Price = data.Price;
 
         await repository.UpdateAsync(product);
         
