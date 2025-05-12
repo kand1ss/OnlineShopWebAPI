@@ -18,10 +18,26 @@ public class CatalogManagementService(
     IMessageSerializer<UpdateProductRequest, byte[]> updateRequestSerializer,
     IMessageSerializer<RemoveProductRequest, byte[]> removeRequestSerializer,
     ProductRequestValidator validator,
-    ILogger<CatalogManagementService> logger) 
+    ILogger<CatalogManagementService> logger)
     : API_Gate.CatalogManagementService.CatalogManagementServiceBase
 {
+    private async Task<ProductReply> ExceptionHandlingWrap(Func<Task<ProductReply>> func)
+    {
+        try
+        {
+            return await func();
+        }
+        catch (Exception e)
+        {
+            logger.LogError($"An error occurred while processing the request: {e.Message}");
+            return CreateReply(false, "", e.Message);
+        }
+    }
+    
     public override async Task<ProductReply> CreateProduct(CreateProductData request, ServerCallContext context)
+        => await ExceptionHandlingWrap(() => TryCreateProduct(request));
+
+    private async Task<ProductReply> TryCreateProduct(CreateProductData request)
     {
         logger.LogInformation("CREATE: Received a request to create a product.");
         if (!ProductRequestParser.TryParseDecimal(request.Price, out var price, out var error))
@@ -62,6 +78,9 @@ public class CatalogManagementService(
         => new() { Success = success, Result = result, Error = error };
 
     public override async Task<ProductReply> UpdateProduct(UpdateProductData request, ServerCallContext context)
+        => await ExceptionHandlingWrap(() => TryUpdateProduct(request));
+
+    private async Task<ProductReply> TryUpdateProduct(UpdateProductData request)
     {
         logger.LogInformation("UPDATE: Received a request to update a product.");
         if (!ProductRequestParser.TryParseDecimal(request.Price, out var price, out var error)
@@ -83,6 +102,9 @@ public class CatalogManagementService(
     }
 
     public override async Task<ProductReply> RemoveProduct(RemoveProductData request, ServerCallContext context)
+        => await ExceptionHandlingWrap(() => TryRemoveProduct(request));
+
+    private async Task<ProductReply> TryRemoveProduct(RemoveProductData request)
     {
         logger.LogInformation("REMOVE: Received a request to remove a product.");
         if(!ProductRequestParser.TryParseGuid(request.Id, out var guid, out var error))
