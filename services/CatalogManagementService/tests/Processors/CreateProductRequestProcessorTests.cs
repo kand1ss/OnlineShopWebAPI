@@ -1,7 +1,6 @@
 using CatalogManagementService.Application;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Infrastructure;
-using CatalogManagementService.Infrastructure.Repositories;
 using Moq;
 using Xunit;
 

@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Infrastructure.Repositories;
 using Core;

@@ -1,6 +1,5 @@
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Infrastructure.Repositories;
-using Core;
 using Core.Contracts;
 using Core.DTO;
 

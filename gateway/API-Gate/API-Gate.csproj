@@ -15,15 +15,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Application\Application.csproj" />
-      <ProjectReference Include="..\Core\Core.csproj" />
-      <ProjectReference Include="..\RabbitMQClient\RabbitMQClient.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Protobuf Include="src\Application\Protos\CatalogManagementService.proto">
         <Generator>MSBuild:Compile</Generator>
       </Protobuf>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\shared\Application\Application.csproj" />
+      <ProjectReference Include="..\..\shared\Core\Core.csproj" />
+      <ProjectReference Include="..\..\shared\RabbitMQClient\RabbitMQClient.csproj" />
     </ItemGroup>
 
 </Project>

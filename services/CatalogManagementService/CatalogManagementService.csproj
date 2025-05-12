@@ -29,13 +29,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Application\Application.csproj" />
-      <ProjectReference Include="..\Core\Core.csproj" />
-      <ProjectReference Include="..\RabbitMQClient\RabbitMQClient.csproj" />
+      <Folder Include="src\Infrastructure\Database\Migrations\" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="src\Infrastructure\Database\Migrations\" />
+      <ProjectReference Include="..\..\shared\Application\Application.csproj" />
+      <ProjectReference Include="..\..\shared\Core\Core.csproj" />
+      <ProjectReference Include="..\..\shared\RabbitMQClient\RabbitMQClient.csproj" />
     </ItemGroup>
 
 </Project>
