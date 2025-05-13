@@ -1,21 +1,20 @@
-using APIGate.Application.Deserializers;
-using APIGate.Hosted;
+using CatalogManagementGateway.Application.Deserializers;
+using CatalogManagementGateway.Hosted;
 using CatalogManagementService.Application;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;
 using Core.DTO;
-using RabbitMQClient;
 using RabbitMQClient.Contracts;
 
-namespace APIGate.Application;
+namespace RabbitMQClient.Application;
 
 public static class ApplicationExtensions
 {
     public static IServiceCollection InitializeRabbitMQ(this IServiceCollection services)
     {
         services.AddSingleton<IConnectionService, RabbitMQConnectionService>();
-        services.AddSingleton<IRabbitMQClient, RabbitMQClient.RabbitMQClient>();
+        services.AddSingleton<IRabbitMQClient, RabbitMQClient>();
         services.AddHostedService<RabbitMQInitializer>();
         
         return services;

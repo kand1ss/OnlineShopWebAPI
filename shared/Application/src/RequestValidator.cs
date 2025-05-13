@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace APIGate.Application.Validators;
+namespace CatalogManagementGateway.Application.Validators;
 
 public class RequestValidator
 {

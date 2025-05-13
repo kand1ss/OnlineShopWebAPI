@@ -1,4 +1,4 @@
-namespace APIGate.Application.Parsers;
+namespace CatalogManagementGateway.Application.Parsers;
 
 public static class ProductRequestParser
 {

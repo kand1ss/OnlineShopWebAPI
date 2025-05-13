@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using APIGate.Application;
+using CatalogManagementGateway.Application;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;

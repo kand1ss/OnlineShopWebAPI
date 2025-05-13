@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\gateway\API-Gate\API-Gate.csproj" />
+      <ProjectReference Include="..\..\gateway\CatalogManagementGateway\CatalogManagementGateway.csproj" />
     </ItemGroup>
 
 </Project>

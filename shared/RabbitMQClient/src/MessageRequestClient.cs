@@ -1,13 +1,13 @@
-using APIGate.Consumers;
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQClient;
+using RabbitMQClient.Consumers;
 using RabbitMQClient.Contracts;
 
-namespace APIGate.Application;
+namespace CatalogManagementGateway.Application;
 
 /// <summary>
 /// Represents a client for publishing messages to a RabbitMQ broker and consuming replies asynchronously.

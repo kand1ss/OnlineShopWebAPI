@@ -4,6 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,15 +16,19 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Protobuf Include="src\Application\Protos\CatalogManagementService.proto">
-        <Generator>MSBuild:Compile</Generator>
-      </Protobuf>
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\shared\Application\Application.csproj" />
       <ProjectReference Include="..\..\shared\Core\Core.csproj" />
       <ProjectReference Include="..\..\shared\RabbitMQClient\RabbitMQClient.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Protobuf Include="src\Protos\CatalogManagementGateway.proto" GrpcServices="Both"/>
     </ItemGroup>
 
 </Project>

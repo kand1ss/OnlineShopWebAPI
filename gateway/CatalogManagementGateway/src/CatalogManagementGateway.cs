@@ -1,8 +1,7 @@
 using System.Text.Json;
-using API_Gate;
-using APIGate.Application;
-using APIGate.Application.Parsers;
-using APIGate.Application.Validators;
+using CatalogManagementGateway.Application;
+using CatalogManagementGateway.Application.Parsers;
+using CatalogManagementGateway.Application.Validators;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Application.Replies;
 using Core;
@@ -10,16 +9,16 @@ using Core.Contracts;
 using Core.DTO;
 using Grpc.Core;
 
-namespace APIGate.Services;
+namespace CatalogManagementGateway.Services;
 
-public class CatalogManagementService(
+public class CatalogManagementGateway(
     MessageRequestClient<ProductDTO> messageRequestClient,
     IMessageSerializer<CreateProductRequest, byte[]> createRequestSerializer,
     IMessageSerializer<UpdateProductRequest, byte[]> updateRequestSerializer,
     IMessageSerializer<RemoveProductRequest, byte[]> removeRequestSerializer,
     RequestValidator validator,
-    ILogger<CatalogManagementService> logger)
-    : API_Gate.CatalogManagementService.CatalogManagementServiceBase
+    ILogger<CatalogManagementGateway> logger)
+    : global::CatalogManagementGateway.CatalogManagementGateway.CatalogManagementGatewayBase
 {
     private async Task<ProductReply> ExceptionHandlingWrap(Func<Task<ProductReply>> func)
     {

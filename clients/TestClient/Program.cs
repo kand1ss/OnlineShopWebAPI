@@ -1,12 +1,12 @@
-﻿using API_Gate;
+﻿using CatalogManagementGateway;
 using Grpc.Net.Client;
 
 class Program
 {
     static async Task Main()
     {
-        using var channel = GrpcChannel.ForAddress("https://localhost:7008");
-        var client = new API_Gate.CatalogManagementService.CatalogManagementServiceClient(channel);
+        using var channel = GrpcChannel.ForAddress("https://localhost:443");
+        var client = new CatalogManagementGateway.CatalogManagementGateway.CatalogManagementGatewayClient(channel);
 
         var createReply = await client.CreateProductAsync(new CreateProductData
         {

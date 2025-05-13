@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using APIGate.Application.Deserializers;
+using CatalogManagementGateway.Application.Deserializers;
 using CatalogManagementService.Application.DTO;
 using Xunit;
 

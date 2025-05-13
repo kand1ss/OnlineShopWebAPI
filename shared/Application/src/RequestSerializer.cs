@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Core.Contracts;
 
-namespace APIGate.Application.Deserializers;
+namespace CatalogManagementGateway.Application.Deserializers;
 
 public class RequestSerializer<T> : IMessageSerializer<T, byte[]>
 {

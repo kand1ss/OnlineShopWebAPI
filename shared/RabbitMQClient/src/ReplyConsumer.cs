@@ -1,10 +1,9 @@
 using CatalogManagementService.Application.Replies;
 using Core.Contracts;
 using RabbitMQ.Client.Events;
-using RabbitMQClient;
 using RabbitMQClient.Contracts;
 
-namespace APIGate.Consumers;
+namespace RabbitMQClient.Consumers;
 
 /// <summary>
 /// Handles the consumption of messages from a RabbitMQ queue for request-reply messaging.

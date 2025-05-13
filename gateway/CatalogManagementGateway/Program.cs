@@ -1,6 +1,7 @@
-using APIGate.Application;
-using APIGate.Application.Validators;
+using CatalogManagementGateway.Application;
+using CatalogManagementGateway.Application.Validators;
 using Core.DTO;
+using RabbitMQClient.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,5 +13,5 @@ builder.Services.AddGrpc();
 
 var app = builder.Build();
 
-app.MapGrpcService<APIGate.Services.CatalogManagementService>();
+app.MapGrpcService<CatalogManagementGateway.Services.CatalogManagementGateway>();
 app.Run();

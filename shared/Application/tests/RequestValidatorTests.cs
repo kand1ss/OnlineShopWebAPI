@@ -1,4 +1,4 @@
-using APIGate.Application.Validators;
+using CatalogManagementGateway.Application.Validators;
 using CatalogManagementService.Application.DTO;
 using Xunit;
 

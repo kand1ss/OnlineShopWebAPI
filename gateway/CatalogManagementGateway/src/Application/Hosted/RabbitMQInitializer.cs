@@ -1,7 +1,7 @@
 using RabbitMQClient;
 using RabbitMQClient.Contracts;
 
-namespace APIGate.Hosted;
+namespace CatalogManagementGateway.Hosted;
 
 public class RabbitMQInitializer(IConnectionService connectionService, IRabbitMQClient client) : IHostedService
 {
