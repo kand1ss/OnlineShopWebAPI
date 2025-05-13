@@ -1,5 +1,6 @@
 using CatalogManagementService.Application;
 using CatalogManagementService.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,12 @@ builder.Services.InitializeRabbitMQ();
 builder.Services.AddHostedService<CatalogManagementService.Application.CatalogManagementService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
