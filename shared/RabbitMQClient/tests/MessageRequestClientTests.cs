@@ -57,7 +57,8 @@ public class MessageRequestClientTests : TestWhichUsingRabbitMQ
         var request = new CreateProductRequest("Product", "Description", 100);
         var json = JsonSerializer.Serialize(request);
         var body = Encoding.UTF8.GetBytes(json);
-        var reply = await _requestClient.PublishMessageAndConsumeReply(body, _testQueue, _testQueueReply);
+        var reply = await _requestClient.PublishMessageAndConsumeReply(
+            body, _testQueue, _testQueueReply, TimeSpan.FromSeconds(1));
         return (request, reply);
     }
 
@@ -93,7 +94,8 @@ public class MessageRequestClientTests : TestWhichUsingRabbitMQ
         await InitializeQueues();
         await CreateConsumer();
 
-        var reply = await _requestClient.PublishMessageAndConsumeReply([], _testQueue, _testQueueReply);
+        var reply = await _requestClient.PublishMessageAndConsumeReply(
+            [], _testQueue, _testQueueReply, TimeSpan.FromSeconds(1));;
 
         Assert.NotNull(reply);
         Assert.False(reply.Success);

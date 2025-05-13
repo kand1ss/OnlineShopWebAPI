@@ -7,6 +7,7 @@ builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.InitializeRequestDeserializers();
 builder.Services.InitializeRequestProcessors();
+builder.Services.InitializeRequestConsumers();
 builder.Services.InitializeRabbitMQ();
 builder.Services.AddHostedService<CatalogManagementService.Application.CatalogManagementService>();
 

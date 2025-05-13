@@ -29,8 +29,10 @@ public class MessageRequestClient<TReplyResult>(
     /// <param name="publishRoutingKey">The routing key used to publish the message.</param>
     /// <param name="replyQueue">The name of the reply queue where the response message will be consumed.</param>
     /// <returns>A Task that represents the asynchronous operation. The task result contains the reply message deserialized into a <see cref="RequestReply{TReplyResult}"/>.</returns>
-    public async Task<RequestReply<TReplyResult>> PublishMessageAndConsumeReply(byte[] body, string publishRoutingKey, string replyQueue)
+    public async Task<RequestReply<TReplyResult>> PublishMessageAndConsumeReply(byte[] body, string publishRoutingKey, string replyQueue, TimeSpan? timeout = null)
     {
+        timeout ??= _defaultReplyTimeout;
+        
         var generatedId = Guid.NewGuid().ToString();
         try
         {

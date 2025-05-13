@@ -25,13 +25,18 @@ public class ResultPublishingConsumerDecorator<TReply>(
     string exchange = "") : IMessageConsumerWithResult<TReply>
 {
     public Func<TReply, Task>? OnProcessed { get; set; }
-    
+    public Func<Exception, Task>? OnError { get; set; }
+
     public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
     {
         try
         {
             consumer.OnProcessed += PublishResult;
             await consumer.ProcessConsumeAsync(model, ea);
+        }
+        catch (Exception e)
+        {
+            OnError?.Invoke(e);
         }
         finally
         {

@@ -19,7 +19,8 @@ public class ReplyPublishingMessageConsumerDecorator<TReply>(
     : IMessageConsumerWithResult<TReply>
 {
     public Func<TReply, Task>? OnProcessed { get; set; }
-    
+    public Func<Exception, Task>? OnError { get; set; }
+
     public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
     {
         async Task OnConsumerOnProcessed(TReply reply)
@@ -36,6 +37,7 @@ public class ReplyPublishingMessageConsumerDecorator<TReply>(
         catch (Exception e)
         {
             await SendReply(ea.BasicProperties, RequestReply<TReply>.Fail(e.Message));
+            OnError?.Invoke(e);
             throw;
         }
         finally

@@ -1,7 +1,6 @@
 using CatalogManagementService.Application.DTO;
 using CatalogService.Domain;
 using Core;
-using Core.Contracts;
 using Core.DTO;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -12,10 +11,11 @@ using RabbitMQClient.Contracts;
 namespace CatalogManagementService.Application;
 
 public class CatalogManagementService(
-    IRabbitMQClient client, IConnectionService connectionService, IServiceScopeFactory scopeFactory,
-    IMessageDeserializer<byte[], CreateProductRequest> createRequestDeserializer,
-    IMessageDeserializer<byte[], UpdateProductRequest> updateRequestDeserializer,
-    IMessageDeserializer<byte[], RemoveProductRequest> removeRequestDeserializer,
+    IRabbitMQClient client, 
+    IConnectionService connectionService,
+    MessageHandlerConsumer<CreateProductRequest, ProductDTO> createConsumer,
+    MessageHandlerConsumer<UpdateProductRequest, ProductDTO> updateConsumer,
+    MessageHandlerConsumer<RemoveProductRequest, ProductDTO> removeConsumer,
     ILogger<CatalogManagementService> logger) 
     : BackgroundService
 {
@@ -39,28 +39,22 @@ public class CatalogManagementService(
 
     private async Task InitializeConsumers(CancellationToken ct = default)
     {
-        await RegisterConsumer<CreateProductRequest>(createRequestDeserializer,
-            GlobalQueues.CreateProduct, GlobalRoutingKeys.ProductCreated, ct);
-        await RegisterConsumer<UpdateProductRequest>(updateRequestDeserializer,
-            GlobalQueues.UpdateProduct, GlobalRoutingKeys.ProductUpdated, ct);
-        await RegisterConsumer<RemoveProductRequest>(removeRequestDeserializer,
-            GlobalQueues.RemoveProduct, GlobalRoutingKeys.ProductRemoved, ct);
+        await RegisterConsumer(createConsumer, GlobalQueues.CreateProduct, GlobalRoutingKeys.ProductCreated, ct);
+        await RegisterConsumer(updateConsumer, GlobalQueues.UpdateProduct, GlobalRoutingKeys.ProductUpdated, ct);
+        await RegisterConsumer(removeConsumer, GlobalQueues.RemoveProduct, GlobalRoutingKeys.ProductRemoved, ct);
     }
 
-    private async Task RegisterConsumer<TRequest>(
-        IMessageDeserializer<byte[], TRequest> deserializer,
+    private async Task RegisterConsumer(
+        IMessageConsumerWithResult<ProductDTO> messageConsumer,
         string consumeQueue,
         string publishRoutingKey,
         CancellationToken ct = default) 
     {
         var consumer = new AsyncEventingBasicConsumer(client.Channel);
-
-        var messageHandler = 
-            new MessageHandlerConsumer<TRequest, ProductDTO>(client, scopeFactory, deserializer);
-        var consumerResultPublisher =
-            new ResultPublishingConsumerDecorator<ProductDTO>(client, messageHandler, publishRoutingKey, GlobalExchanges.Products);
-        var consumerReplyPublisher = 
-            new ReplyPublishingMessageConsumerDecorator<ProductDTO>(client, consumerResultPublisher);
+        var consumerResultPublisher = new ResultPublishingConsumerDecorator<ProductDTO>(
+            client, messageConsumer, publishRoutingKey, GlobalExchanges.Products);
+        var consumerReplyPublisher = new ReplyPublishingMessageConsumerDecorator<ProductDTO>(
+            client, consumerResultPublisher);
         
         consumer.ReceivedAsync += consumerReplyPublisher.ProcessConsumeAsync;
         await client.Channel.BasicConsumeAsync(consumeQueue, false, consumer, cancellationToken: ct);

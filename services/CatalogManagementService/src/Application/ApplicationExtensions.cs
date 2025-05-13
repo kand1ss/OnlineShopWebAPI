@@ -2,6 +2,7 @@ using CatalogManagementService.Application.DTO;
 using Core.Contracts;
 using Core.DTO;
 using RabbitMQClient;
+using RabbitMQClient.Consumers;
 using RabbitMQClient.Contracts;
 
 namespace CatalogManagementService.Application;
@@ -23,6 +24,15 @@ public static class ApplicationExtensions
         services.AddScoped<IRequestProcessor<UpdateProductRequest, ProductDTO>, UpdateProductRequestProcessor>();
         services.AddScoped<IRequestProcessor<RemoveProductRequest, ProductDTO>, RemoveProductRequestProcessor>();
 
+        return services;
+    }
+
+    public static IServiceCollection InitializeRequestConsumers(this IServiceCollection services)
+    {
+        services.AddSingleton<MessageHandlerConsumer<CreateProductRequest, ProductDTO>>();
+        services.AddSingleton<MessageHandlerConsumer<UpdateProductRequest, ProductDTO>>();
+        services.AddSingleton<MessageHandlerConsumer<RemoveProductRequest, ProductDTO>>();
+        
         return services;
     }
     
