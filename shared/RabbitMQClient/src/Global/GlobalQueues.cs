@@ -6,8 +6,9 @@ public static class GlobalQueues
     public const string UpdateProduct = "update.product";
     public const string RemoveProduct = "remove.product";
     public const string ProductOperationReply = "product.operation.reply";
-    
-    public const string ProductCreated = "catalog_product_created";
-    public const string ProductUpdated = "catalog_product_updated";
-    public const string ProductRemoved = "catalog_product_removed"; 
+
+    public const string CreateAccount = "create.account";
+    public const string UpdateAccount = "update.account";
+    public const string RemoveAccount = "remove.account";
+    public const string AccountOperationReply = "account.operation.reply";
 }
