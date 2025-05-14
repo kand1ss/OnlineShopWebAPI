@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-option csharp_namespace = "CatalogManagementGateway";
+option csharp_namespace = "CatalogGatewayGRPC";
 package greet;
 
-service CatalogManagementGateway {
+service CatalogGateway {
   rpc CreateProduct (CreateProductData) returns (ProductReply);
   rpc UpdateProduct (UpdateProductData) returns (ProductReply);
   rpc RemoveProduct (RemoveProductData) returns (ProductReply);

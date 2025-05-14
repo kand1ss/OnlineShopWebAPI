@@ -8,7 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\gateway\CatalogManagementGateway\CatalogManagementGateway.csproj" />
+      <ProjectReference Include="..\..\gateway\AccountGateway\AccountGateway.csproj" />
+      <ProjectReference Include="..\..\gateway\CatalogGateway\CatalogGateway.csproj" />
     </ItemGroup>
 
 </Project>

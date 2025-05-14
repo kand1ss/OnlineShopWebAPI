@@ -15,5 +15,5 @@ builder.Services.AddGrpc();
 
 var app = builder.Build();
 
-app.MapGrpcService<CatalogManagementGateway.Services.CatalogManagementGateway>();
+app.MapGrpcService<CatalogGateway.Services.CatalogGateway>();
 app.Run();

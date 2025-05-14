@@ -26,17 +26,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Protobuf Include="src\Protos\CatalogGateway.proto" GrpcServices="Both" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Protobuf Include="src\Protos\CatalogManagementGateway.proto" GrpcServices="Both"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="src\Application\Hosted\" />
     </ItemGroup>
 
 </Project>

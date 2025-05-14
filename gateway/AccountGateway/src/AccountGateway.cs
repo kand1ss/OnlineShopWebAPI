@@ -14,6 +14,7 @@ namespace AccountGateway;
 
 public class AccountGateway(
     IRequestSerializer<byte[]> requestSerializer, 
+    RequestValidator validator,
     IRabbitMQClient client) : AccountGatewayGRPC.AccountGateway.AccountGatewayBase
 {
     private async Task<AccountReply> ExceptionHandlingWrap(Func<Task<AccountReply>> func)
@@ -39,7 +40,6 @@ public class AccountGateway(
         var id = Guid.NewGuid();
         var requestData = request.MapToRequest(id);
 
-        var validator = new RequestValidator();
         if(!validator.Validate(requestData, out var errors))
             return CreateReply(id.ToString(), string.Join("; ", errors), false);
 
@@ -58,7 +58,6 @@ public class AccountGateway(
     {
         var requestData = request.MapToRequest();
 
-        var validator = new RequestValidator();
         if(!validator.Validate(requestData, out var errors))
             return CreateReply(request.Id, string.Join("; ", errors), false);
 

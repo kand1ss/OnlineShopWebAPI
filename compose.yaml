@@ -7,7 +7,8 @@
     ports:
       - "443:443"
     depends_on:
-      - catalog-management-gateway
+      - catalog-gateway
+      - account-gateway
   
   rabbitmq-server:
     image: rabbitmq:4.0-management
@@ -40,11 +41,11 @@
       retries: 3
     restart: unless-stopped
   
-  catalog-management-gateway:
-    image: catalog-management-gateway
+  catalog-gateway:
+    image: catalog-gateway
     build:
       context: .
-      dockerfile: gateway/CatalogManagementGateway/Dockerfile
+      dockerfile: gateway/CatalogGateway/Dockerfile
     environment:
       - RABBITMQ_HOST=rabbitmq-server
     depends_on:

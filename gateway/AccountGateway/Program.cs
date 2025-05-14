@@ -1,26 +1,12 @@
-using CatalogManagementGateway.Application.Deserializers;
-using CatalogManagementGateway.Hosted;
-using CatalogManagementService.Application;
-using Core.Contracts;
-using OpenTelemetry.Trace;
-using RabbitMQClient;
-using RabbitMQClient.Contracts;
+using AccountGateway.Application;
+using CatalogManagementGateway.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IRabbitMQClient, RabbitMQClient.RabbitMQClient>();
-builder.Services.AddSingleton<IConnectionService, RabbitMQConnectionService>();
-builder.Services.AddHostedService<RabbitMQInitializer>();
-builder.Services.AddSingleton<IRequestDeserializer, RequestDeserializer>();
-builder.Services.AddScoped<IRequestSerializer<byte[]>, RequestSerializer>();
-builder.Services.AddOpenTelemetry()
-    .WithTracing(tracing =>
-    {
-        tracing
-            .AddAspNetCoreInstrumentation()
-            .AddGrpcClientInstrumentation()
-            .AddConsoleExporter();
-    });
+builder.Services.InitializeRabbitMQ();
+builder.Services.AddSerializers();
+builder.Services.AddSingleton<RequestValidator>();
+builder.Services.InitializeOpenTelemetry();
 
 builder.Services.AddGrpc();
 

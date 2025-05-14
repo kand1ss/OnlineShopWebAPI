@@ -1,4 +1,4 @@
-namespace CatalogManagementGateway.Application.Parsers;
+namespace CatalogGateway.Application.Parsers;
 
 public static class ProductRequestParser
 {

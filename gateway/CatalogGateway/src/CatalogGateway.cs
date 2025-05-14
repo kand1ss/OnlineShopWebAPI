@@ -1,6 +1,7 @@
 using System.Text.Json;
+using CatalogGateway.Application.Parsers;
+using CatalogGatewayGRPC;
 using CatalogManagementGateway.Application;
-using CatalogManagementGateway.Application.Parsers;
 using CatalogManagementGateway.Application.Validators;
 using CatalogManagementService.Application.DTO;
 using CatalogManagementService.Application.Replies;
@@ -9,14 +10,14 @@ using Core.Contracts;
 using Core.DTO;
 using Grpc.Core;
 
-namespace CatalogManagementGateway.Services;
+namespace CatalogGateway.Services;
 
-public class CatalogManagementGateway(
+public class CatalogGateway(
     MessageRequestClient<ProductDTO> messageRequestClient,
     IRequestSerializer<byte[]> requestSerializer,
     RequestValidator validator,
-    ILogger<CatalogManagementGateway> logger)
-    : global::CatalogManagementGateway.CatalogManagementGateway.CatalogManagementGatewayBase
+    ILogger<CatalogGateway> logger)
+    : CatalogGatewayGRPC.CatalogGateway.CatalogGatewayBase
 {
     private async Task<ProductReply> ExceptionHandlingWrap(Func<Task<ProductReply>> func)
     {

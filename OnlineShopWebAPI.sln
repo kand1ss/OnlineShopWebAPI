@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "shared\Appli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMQClient", "shared\RabbitMQClient\RabbitMQClient.csproj", "{A6F35355-FD25-415A-B25C-B2EDF1DAFE1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogManagementGateway", "gateway\CatalogManagementGateway\CatalogManagementGateway.csproj", "{BFC24141-A6B0-48AA-BDD8-869F3E04BDB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogGateway", "gateway\CatalogGateway\CatalogGateway.csproj", "{BFC24141-A6B0-48AA-BDD8-869F3E04BDB0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogManagementService", "services\CatalogManagementService\CatalogManagementService.csproj", "{6371AF24-63B1-45DE-BE74-74D8C3C77B45}"
 EndProject
