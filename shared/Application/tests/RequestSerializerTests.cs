@@ -8,7 +8,7 @@ namespace CatalogManagementService.tests.Deserializers;
 
 public class RequestSerializerTests
 {
-    private readonly RequestSerializer<CreateProductRequest> _deserializer = new();
+    private readonly RequestSerializer _deserializer = new();
     
     [Theory]
     [InlineData("product", null, 100)]

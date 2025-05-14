@@ -1,10 +1,8 @@
 using CatalogManagementGateway.Application.Deserializers;
 using CatalogManagementGateway.Hosted;
 using CatalogManagementService.Application;
-using CatalogManagementService.Application.DTO;
-using CatalogManagementService.Application.Replies;
 using Core.Contracts;
-using Core.DTO;
+using OpenTelemetry.Trace;
 using RabbitMQClient.Contracts;
 
 namespace RabbitMQClient.Application;
@@ -20,12 +18,25 @@ public static class ApplicationExtensions
         return services;
     }
     
-    public static IServiceCollection AddDeserializers(this IServiceCollection services)
+    public static IServiceCollection AddSerializers(this IServiceCollection services)
     {
-        services.AddSingleton<IMessageDeserializer<byte[], RequestReply<ProductDTO>>, RequestDeserializer<RequestReply<ProductDTO>>>();
-        services.AddSingleton<IMessageSerializer<UpdateProductRequest, byte[]>, RequestSerializer<UpdateProductRequest>>(); 
-        services.AddSingleton<IMessageSerializer<CreateProductRequest, byte[]>, RequestSerializer<CreateProductRequest>>();
-        services.AddSingleton<IMessageSerializer<RemoveProductRequest, byte[]>, RequestSerializer<RemoveProductRequest>>();
+        services.AddSingleton<IRequestDeserializer, RequestDeserializer>();
+        services.AddSingleton<IRequestSerializer<byte[]>, RequestSerializer>(); 
+
+        return services;
+    }
+
+    public static IServiceCollection InitializeOpenTelemetry(this IServiceCollection services)
+    {
+        services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+                tracing
+                    .AddAspNetCoreInstrumentation()
+                    .AddGrpcClientInstrumentation()
+                    .AddConsoleExporter();
+            });
+        
         return services;
     }
 }

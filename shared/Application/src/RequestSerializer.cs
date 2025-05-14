@@ -4,9 +4,9 @@ using Core.Contracts;
 
 namespace CatalogManagementGateway.Application.Deserializers;
 
-public class RequestSerializer<T> : IMessageSerializer<T, byte[]>
+public class RequestSerializer : IRequestSerializer<byte[]>
 {
-    public byte[] Serialize(T data)
+    public byte[] Serialize<T>(T data)
     {
         var json = JsonSerializer.Serialize(data);
         return Encoding.UTF8.GetBytes(json);

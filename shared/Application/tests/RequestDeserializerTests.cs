@@ -8,7 +8,7 @@ namespace CatalogManagementService.tests.Deserializers;
 
 public class RequestDeserializerTests
 {
-    private readonly RequestDeserializer<CreateProductRequest> _deserializer = new();
+    private readonly RequestDeserializer _deserializer = new();
     
     [Theory]
     [InlineData("product", null, 100)]
@@ -20,7 +20,7 @@ public class RequestDeserializerTests
         var serialized = JsonSerializer.Serialize(request);
         var bytes = Encoding.UTF8.GetBytes(serialized);
         
-        var result = _deserializer.Deserialize(bytes);
+        var result = _deserializer.Deserialize<CreateProductRequest>(bytes);
         
         Assert.Equal(title, result.Title);
         Assert.Equal(description, result.Description);;
@@ -36,6 +36,6 @@ public class RequestDeserializerTests
         var serialized = JsonSerializer.Serialize(data);
         var bytes = Encoding.UTF8.GetBytes(serialized);
 
-        Assert.Throws<JsonException>(() => _deserializer.Deserialize(bytes));
+        Assert.Throws<JsonException>(() => _deserializer.Deserialize<CreateProductRequest>(bytes));
     }
 }

@@ -4,5 +4,5 @@ namespace RabbitMQClient.Contracts;
 
 public interface IMessageConsumer
 {
-    Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea);
+    Task ProcessConsumeAsync<TRequest>(object model, BasicDeliverEventArgs ea);
 }

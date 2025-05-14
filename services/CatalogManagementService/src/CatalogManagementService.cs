@@ -2,8 +2,6 @@ using CatalogManagementService.Application.DTO;
 using CatalogService.Domain;
 using Core;
 using Core.DTO;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using RabbitMQClient;
 using RabbitMQClient.Consumers;
 using RabbitMQClient.Contracts;
@@ -13,9 +11,8 @@ namespace CatalogManagementService.Application;
 public class CatalogManagementService(
     IRabbitMQClient client, 
     IConnectionService connectionService,
-    MessageHandlerConsumer<CreateProductRequest, ProductDTO> createConsumer,
-    MessageHandlerConsumer<UpdateProductRequest, ProductDTO> updateConsumer,
-    MessageHandlerConsumer<RemoveProductRequest, ProductDTO> removeConsumer,
+    IConsumerRegister consumerRegister,
+    MessageHandlerConsumer<ProductDTO> requestConsumer,
     ILogger<CatalogManagementService> logger) 
     : BackgroundService
 {
@@ -39,25 +36,26 @@ public class CatalogManagementService(
 
     private async Task InitializeConsumers(CancellationToken ct = default)
     {
-        await RegisterConsumer(createConsumer, GlobalQueues.CreateProduct, GlobalRoutingKeys.ProductCreated, ct);
-        await RegisterConsumer(updateConsumer, GlobalQueues.UpdateProduct, GlobalRoutingKeys.ProductUpdated, ct);
-        await RegisterConsumer(removeConsumer, GlobalQueues.RemoveProduct, GlobalRoutingKeys.ProductRemoved, ct);
+        await RegisterConsumer<CreateProductRequest>(requestConsumer, 
+            GlobalQueues.CreateProduct, GlobalRoutingKeys.ProductCreated, ct);
+        await RegisterConsumer<UpdateProductRequest>(requestConsumer, 
+            GlobalQueues.UpdateProduct, GlobalRoutingKeys.ProductUpdated, ct);
+        await RegisterConsumer<RemoveProductRequest>(requestConsumer, 
+            GlobalQueues.RemoveProduct, GlobalRoutingKeys.ProductRemoved, ct);
     }
 
-    private async Task RegisterConsumer(
-        IMessageConsumerWithResult<ProductDTO> messageConsumer,
+    private async Task RegisterConsumer<TRequest>(
+        IMessageConsumerWithResult<ProductDTO> messageConsumer, 
         string consumeQueue,
         string publishRoutingKey,
-        CancellationToken ct = default) 
+        CancellationToken ct = default)
     {
-        var consumer = new AsyncEventingBasicConsumer(client.Channel);
         var consumerResultPublisher = new ResultPublishingConsumerDecorator<ProductDTO>(
             client, messageConsumer, publishRoutingKey, GlobalExchanges.Products);
         var consumerReplyPublisher = new ReplyPublishingMessageConsumerDecorator<ProductDTO>(
             client, consumerResultPublisher);
         
-        consumer.ReceivedAsync += consumerReplyPublisher.ProcessConsumeAsync;
-        await client.Channel.BasicConsumeAsync(consumeQueue, false, consumer, cancellationToken: ct);
+        await consumerRegister.RegisterConsumer<TRequest, ProductDTO>(consumerReplyPublisher, consumeQueue, ct);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)

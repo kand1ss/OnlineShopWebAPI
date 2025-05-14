@@ -9,15 +9,6 @@ namespace CatalogManagementService.Application;
 
 public static class ApplicationExtensions
 {
-    public static IServiceCollection InitializeRequestDeserializers(this IServiceCollection services)
-    {
-        services.AddSingleton<IMessageDeserializer<byte[], CreateProductRequest>, RequestDeserializer<CreateProductRequest>>();
-        services.AddSingleton<IMessageDeserializer<byte[], UpdateProductRequest>, RequestDeserializer<UpdateProductRequest>>();
-        services.AddSingleton<IMessageDeserializer<byte[], RemoveProductRequest>, RequestDeserializer<RemoveProductRequest>>();
-
-        return services;
-    }
-    
     public static IServiceCollection InitializeRequestProcessors(this IServiceCollection services)
     {
         services.AddScoped<IRequestProcessor<CreateProductRequest, ProductDTO>, CreateProductRequestProcessor>();
@@ -29,9 +20,7 @@ public static class ApplicationExtensions
 
     public static IServiceCollection InitializeRequestConsumers(this IServiceCollection services)
     {
-        services.AddSingleton<MessageHandlerConsumer<CreateProductRequest, ProductDTO>>();
-        services.AddSingleton<MessageHandlerConsumer<UpdateProductRequest, ProductDTO>>();
-        services.AddSingleton<MessageHandlerConsumer<RemoveProductRequest, ProductDTO>>();
+        services.AddSingleton<MessageHandlerConsumer<ProductDTO>>();
         
         return services;
     }
@@ -40,6 +29,7 @@ public static class ApplicationExtensions
     {
         services.AddSingleton<IRabbitMQClient, RabbitMQClient.RabbitMQClient>();
         services.AddSingleton<IConnectionService, RabbitMQConnectionService>();
+        services.AddSingleton<IConsumerRegister, ConsumerRegister>();
         
         return services;
     }

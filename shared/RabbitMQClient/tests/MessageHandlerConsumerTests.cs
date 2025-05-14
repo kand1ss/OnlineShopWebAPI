@@ -14,7 +14,7 @@ namespace RabbitMQClient.tests;
 
 public class MessageHandlerConsumerTests : TestWhichUsingRabbitMQ
 {
-    private readonly MessageHandlerConsumer<UpdateProductRequest, CreateProductRequest> _consumer;
+    private readonly MessageHandlerConsumer<CreateProductRequest> _consumer;
     private readonly string _testQueue = "test-queue";
 
     public MessageHandlerConsumerTests()
@@ -24,8 +24,8 @@ public class MessageHandlerConsumerTests : TestWhichUsingRabbitMQ
                 x.Process(It.IsAny<UpdateProductRequest>()))
             .ReturnsAsync(new CreateProductRequest("test", null, 0));
 
-        var deserializerMock = new Mock<IMessageDeserializer<byte[], UpdateProductRequest>>();
-        deserializerMock.Setup(x => x.Deserialize(It.IsAny<byte[]>()))
+        var deserializerMock = new Mock<IRequestDeserializer>();
+        deserializerMock.Setup(x => x.Deserialize<UpdateProductRequest>(It.IsAny<byte[]>()))
             .Returns<byte[]>(x =>
             {
                 var body = Encoding.UTF8.GetString(x);
@@ -43,7 +43,7 @@ public class MessageHandlerConsumerTests : TestWhichUsingRabbitMQ
         var scopeFactoryMock = new Mock<IServiceScopeFactory>();
         scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
         
-        var loggerMock = new Mock<ILogger<MessageHandlerConsumer<UpdateProductRequest, CreateProductRequest>>>();
+        var loggerMock = new Mock<ILogger<MessageHandlerConsumer<CreateProductRequest>>>();
 
         _consumer = new(
             RabbitClientMock.Object, scopeFactoryMock.Object, deserializerMock.Object, loggerMock.Object);
@@ -65,7 +65,7 @@ public class MessageHandlerConsumerTests : TestWhichUsingRabbitMQ
     private async Task InitializeConsumer(string message)
     {
         var consumer = new AsyncEventingBasicConsumer(Channel);
-        consumer.ReceivedAsync += _consumer.ProcessConsumeAsync;
+        consumer.ReceivedAsync += _consumer.ProcessConsumeAsync<UpdateProductRequest>;
         await Channel.BasicConsumeAsync(_testQueue, false, consumer);
         await Channel.BasicPublishAsync("", _testQueue, true, body: Encoding.UTF8.GetBytes(message));
     }

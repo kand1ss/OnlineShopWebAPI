@@ -17,7 +17,7 @@ namespace CatalogManagementGateway.Application;
 /// <typeparam name="TReplyResult">The type of the reply result expected to be deserialized from the consumed message.</typeparam>
 public class MessageRequestClient<TReplyResult>(
     IRabbitMQClient client,
-    IMessageDeserializer<byte[], RequestReply<TReplyResult>> replyDeserializer,
+    IRequestDeserializer replyDeserializer,
     ILogger<MessageRequestClient<TReplyResult>> logger
     ) : IMessageRequestClient<TReplyResult>
 {
@@ -29,14 +29,15 @@ public class MessageRequestClient<TReplyResult>(
     /// <param name="publishRoutingKey">The routing key used to publish the message.</param>
     /// <param name="replyQueue">The name of the reply queue where the response message will be consumed.</param>
     /// <returns>A Task that represents the asynchronous operation. The task result contains the reply message deserialized into a <see cref="RequestReply{TReplyResult}"/>.</returns>
-    public async Task<RequestReply<TReplyResult>> PublishMessageAndConsumeReply(byte[] body, string publishRoutingKey, string replyQueue, TimeSpan? timeout = null)
+    public async Task<RequestReply<TReplyResult>> PublishMessageAndConsumeReply<TRequest>(byte[] body, string publishRoutingKey, string replyQueue, TimeSpan? timeout = null)
     {
         timeout ??= _defaultReplyTimeout;
         
         var generatedId = Guid.NewGuid().ToString();
         try
         {
-            return await TryPublishMessageAndConsumeReply(body, generatedId, publishRoutingKey, replyQueue);
+            return await TryPublishMessageAndConsumeReply<TRequest>(
+                body, generatedId, publishRoutingKey, replyQueue);
         }
         catch (Exception e)
         {
@@ -45,7 +46,7 @@ public class MessageRequestClient<TReplyResult>(
         }
     }
 
-    private async Task<RequestReply<TReplyResult>> TryPublishMessageAndConsumeReply(byte[] body, string generatedId, string publishRoutingKey, string replyQueue)
+    private async Task<RequestReply<TReplyResult>> TryPublishMessageAndConsumeReply<TRequest>(byte[] body, string generatedId, string publishRoutingKey, string replyQueue)
     {
         var props = CreateBasicProperties(generatedId, replyQueue);
         
@@ -60,7 +61,7 @@ public class MessageRequestClient<TReplyResult>(
         var consumer = new AsyncEventingBasicConsumer(client.Channel);
         var replyConsumer = new ReplyConsumer<TReplyResult>(client, replyDeserializer, generatedId, tcs);
         
-        consumer.ReceivedAsync += replyConsumer.ProcessConsumeAsync;
+        consumer.ReceivedAsync += replyConsumer.ProcessConsumeAsync<TRequest>;
         await client.Channel.BasicConsumeAsync(replyQueue, false, consumer);
         
         var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(_defaultReplyTimeout));

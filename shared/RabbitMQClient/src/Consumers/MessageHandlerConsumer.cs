@@ -12,23 +12,23 @@ namespace RabbitMQClient.Consumers;
 /// </summary>
 /// <typeparam name="TRequest">The type of the incoming request message to be processed.</typeparam>
 /// <typeparam name="TReply">The type of the response generated after processing the message.</typeparam>
-public class MessageHandlerConsumer<TRequest, TReply>(
+public class MessageHandlerConsumer<TReply>(
     IRabbitMQClient client,
     IServiceScopeFactory scopeFactory,
-    IMessageDeserializer<byte[], TRequest> deserializer,
-    ILogger<MessageHandlerConsumer<TRequest, TReply>> logger) : IMessageConsumerWithResult<TReply>
+    IRequestDeserializer deserializer,
+    ILogger<MessageHandlerConsumer<TReply>> logger) : IMessageConsumerWithResult<TReply>
 {
     public Func<TReply, Task>? OnProcessed { get; set; }
     public Func<Exception, Task>? OnError { get; set; }
 
     
-    public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
+    public async Task ProcessConsumeAsync<TRequest>(object model, BasicDeliverEventArgs ea)
     {
         logger.LogInformation($"[{ea.BasicProperties.CorrelationId}] Received message of type '{typeof(TRequest).Name}'");
         
         try
         {
-            var data = deserializer.Deserialize(ea.Body.ToArray());
+            var data = deserializer.Deserialize<TRequest>(ea.Body.ToArray());
             logger.LogInformation($"[{ea.BasicProperties.CorrelationId}] Deserialized message of type '{typeof(TRequest).Name}'");
 
             using var scope = scopeFactory.CreateScope();
@@ -43,7 +43,7 @@ public class MessageHandlerConsumer<TRequest, TReply>(
         {
             logger.LogError($"[{ea.BasicProperties.CorrelationId}] Error while processing message: {e.Message}");
             OnError?.Invoke(e);
-            await client.Channel.BasicNackAsync(ea.DeliveryTag, false, true);
+            await client.Channel.BasicNackAsync(ea.DeliveryTag, false, false);
         }
     }
 }

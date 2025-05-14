@@ -20,9 +20,9 @@ public class MessageRequestClientTests : TestWhichUsingRabbitMQ
 
     public MessageRequestClientTests()
     {
-        var deserializerMock = new Mock<IMessageDeserializer<byte[], RequestReply<CreateProductRequest>>>();
+        var deserializerMock = new Mock<IRequestDeserializer>();
         deserializerMock
-            .Setup(x => x.Deserialize(It.IsAny<byte[]>()))
+            .Setup(x => x.Deserialize<RequestReply<CreateProductRequest>>(It.IsAny<byte[]>()))
             .Returns<byte[]>(x =>
             {
                 var body = Encoding.UTF8.GetString(x);
@@ -57,7 +57,7 @@ public class MessageRequestClientTests : TestWhichUsingRabbitMQ
         var request = new CreateProductRequest("Product", "Description", 100);
         var json = JsonSerializer.Serialize(request);
         var body = Encoding.UTF8.GetBytes(json);
-        var reply = await _requestClient.PublishMessageAndConsumeReply(
+        var reply = await _requestClient.PublishMessageAndConsumeReply<CreateProductRequest>(
             body, _testQueue, _testQueueReply, TimeSpan.FromSeconds(1));
         return (request, reply);
     }
@@ -94,7 +94,7 @@ public class MessageRequestClientTests : TestWhichUsingRabbitMQ
         await InitializeQueues();
         await CreateConsumer();
 
-        var reply = await _requestClient.PublishMessageAndConsumeReply(
+        var reply = await _requestClient.PublishMessageAndConsumeReply<string>(
             [], _testQueue, _testQueueReply, TimeSpan.FromSeconds(1));;
 
         Assert.NotNull(reply);

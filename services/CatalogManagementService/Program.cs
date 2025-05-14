@@ -1,12 +1,13 @@
 using CatalogManagementService.Application;
 using CatalogManagementService.Infrastructure;
+using Core.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.InitializeRequestDeserializers();
+builder.Services.AddSingleton<IRequestDeserializer, RequestDeserializer>();
 builder.Services.InitializeRequestProcessors();
 builder.Services.InitializeRequestConsumers();
 builder.Services.InitializeRabbitMQ();

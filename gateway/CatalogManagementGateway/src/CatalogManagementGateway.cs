@@ -13,9 +13,7 @@ namespace CatalogManagementGateway.Services;
 
 public class CatalogManagementGateway(
     MessageRequestClient<ProductDTO> messageRequestClient,
-    IMessageSerializer<CreateProductRequest, byte[]> createRequestSerializer,
-    IMessageSerializer<UpdateProductRequest, byte[]> updateRequestSerializer,
-    IMessageSerializer<RemoveProductRequest, byte[]> removeRequestSerializer,
+    IRequestSerializer<byte[]> requestSerializer,
     RequestValidator validator,
     ILogger<CatalogManagementGateway> logger)
     : global::CatalogManagementGateway.CatalogManagementGateway.CatalogManagementGatewayBase
@@ -47,10 +45,10 @@ public class CatalogManagementGateway(
         if (!validationResult)
             return reply!;
         
-        var body = createRequestSerializer.Serialize(requestData);
+        var body = requestSerializer.Serialize(requestData);
         logger.LogInformation("CREATE: The request was successfully deserialized.");
         
-        var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
+        var response = await messageRequestClient.PublishMessageAndConsumeReply<CreateProductRequest>(body, 
             GlobalQueues.CreateProduct, GlobalQueues.ProductOperationReply);
 
         return ConvertReply(response);
@@ -96,10 +94,10 @@ public class CatalogManagementGateway(
         if (!validationResult)
             return reply!;
 
-        var body = updateRequestSerializer.Serialize(requestData);
+        var body = requestSerializer.Serialize(requestData);
         logger.LogInformation("UPDATE: The request was successfully deserialized.");
         
-        var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
+        var response = await messageRequestClient.PublishMessageAndConsumeReply<UpdateProductRequest>(body, 
             GlobalQueues.UpdateProduct, GlobalQueues.ProductOperationReply);
 
         return ConvertReply(response);
@@ -115,8 +113,8 @@ public class CatalogManagementGateway(
             return CreateReply(false, "", error);
         
         var requestData = new RemoveProductRequest(guid);
-        var body = removeRequestSerializer.Serialize(requestData);
-        var response = await messageRequestClient.PublishMessageAndConsumeReply(body, 
+        var body = requestSerializer.Serialize(requestData);
+        var response = await messageRequestClient.PublishMessageAndConsumeReply<RemoveProductRequest>(body, 
             GlobalQueues.RemoveProduct, GlobalQueues.ProductOperationReply);
 
         return ConvertReply(response);

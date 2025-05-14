@@ -27,12 +27,12 @@ public class ResultPublishingConsumerDecorator<TReply>(
     public Func<TReply, Task>? OnProcessed { get; set; }
     public Func<Exception, Task>? OnError { get; set; }
 
-    public async Task ProcessConsumeAsync(object model, BasicDeliverEventArgs ea)
+    public async Task ProcessConsumeAsync<TRequest>(object model, BasicDeliverEventArgs ea)
     {
         try
         {
             consumer.OnProcessed += PublishResult;
-            await consumer.ProcessConsumeAsync(model, ea);
+            await consumer.ProcessConsumeAsync<TRequest>(model, ea);
         }
         catch (Exception e)
         {
