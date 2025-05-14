@@ -45,8 +45,17 @@
     build:
       context: .
       dockerfile: gateway/CatalogManagementGateway/Dockerfile
-    ports:
-      - "8080:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq-server
+    depends_on:
+      - rabbitmq-server
+    restart: unless-stopped
+    
+  account-gateway:
+    image: account-gateway
+    build:
+      context: .
+      dockerfile: gateway/AccountGateway/Dockerfile
     environment:
       - RABBITMQ_HOST=rabbitmq-server
     depends_on:
@@ -60,8 +69,18 @@
       dockerfile: services/CatalogManagementService/Dockerfile
     environment:
       - RABBITMQ_HOST=rabbitmq-server
-    ports:
-      - "8081:8081"
+    depends_on:
+      - rabbitmq-server
+      - postgres
+    restart: unless-stopped
+    
+  account-management-service:
+    image: account-management-service
+    build:
+      context: .
+      dockerfile: services/AccountManagementService/Dockerfile
+    environment:
+      - RABBITMQ_HOST=rabbitmq-server
     depends_on:
       - rabbitmq-server
       - postgres

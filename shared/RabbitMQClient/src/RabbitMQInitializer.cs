@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Hosting;
 using RabbitMQClient;
 using RabbitMQClient.Contracts;
 

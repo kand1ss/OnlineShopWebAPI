@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option csharp_namespace = "AccountGatewayGRPC";
+package greet;
+
+import "google/protobuf/empty.proto";
+
+service AccountGateway {
+  rpc CreateAccount (CreateAccountData) returns (AccountReply);
+  rpc UpdateAccount (UpdateAccountData) returns (AccountReply);
+  rpc RemoveAccount (google.protobuf.Empty) returns (AccountReply);
+}
+
+message CreateAccountData {
+  string firstName = 1;
+  string lastName = 2;
+  string surname = 3;
+  string email = 4;
+  string password = 5;
+  string phoneNumber = 6;
+  string dateOfBirthUtc = 7;
+}
+
+message UpdateAccountData {
+  string id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string surname = 4;
+  string email = 5;
+  string password = 6;
+  string phoneNumber = 7;
+  string dateOfBirthUtc = 8;
+}
+
+message AccountReply {
+  string accountId = 1;
+  string message = 2;
+  bool success = 3;
+}
