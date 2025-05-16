@@ -2,6 +2,7 @@ using CatalogManagementGateway.Application.Deserializers;
 using CatalogManagementGateway.Hosted;
 using CatalogManagementService.Application;
 using Core.Contracts;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using RabbitMQClient.Contracts;
 
@@ -34,6 +35,11 @@ public static class ApplicationExtensions
                 tracing
                     .AddAspNetCoreInstrumentation()
                     .AddGrpcClientInstrumentation()
+                    .AddConsoleExporter();
+            })
+            .WithMetrics(meter =>
+            {
+                meter.AddAspNetCoreInstrumentation()
                     .AddConsoleExporter();
             });
         

@@ -1,6 +1,8 @@
 using CatalogManagementService.Application.DTO;
 using Core.Contracts;
 using Core.DTO;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using RabbitMQClient;
 using RabbitMQClient.Consumers;
 using RabbitMQClient.Contracts;
@@ -31,6 +33,40 @@ public static class ApplicationExtensions
         services.AddSingleton<IConnectionService, RabbitMQConnectionService>();
         services.AddSingleton<IConsumerRegister, ConsumerRegister>();
         
+        return services;
+    }
+    
+    public static IServiceCollection InitializeOpenTelemetry(this IServiceCollection services)
+    {
+        services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation()
+                    .AddSqlClientInstrumentation()
+                    .AddConsoleExporter();
+            })
+            .WithMetrics(meter =>
+            {
+                meter.AddAspNetCoreInstrumentation()
+                    .AddSqlClientInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddConsoleExporter();
+            });
+        
+        return services;
+    }
+    
+    public static IServiceCollection InitializeHealthChecks(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHealthChecks()
+            .AddNpgSql(configuration.GetConnectionString("DefaultConnection") ?? "")
+            .AddRabbitMQ(provider =>
+            {
+                var client = provider.GetRequiredService<IRabbitMQClient>();
+                return client.Connection;
+            });
+            
         return services;
     }
 }

@@ -9,7 +9,7 @@ public static class InfrastructureExtension
     {
         services.AddDbContext<CatalogDbContext>(opt =>
         {
-            opt.UseNpgsql(configuration.GetConnectionString("Default"));
+            opt.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
         });
         
         services.AddScoped<IProductRepository, ProductRepository>();
