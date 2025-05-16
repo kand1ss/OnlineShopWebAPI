@@ -10,7 +10,6 @@ namespace RabbitMQClient.Consumers;
 /// Handles the consumption of RabbitMQ messages by deserializing the message, processing it,
 /// and optionally producing a result of type <typeparamref name="TReply"/>.
 /// </summary>
-/// <typeparam name="TRequest">The type of the incoming request message to be processed.</typeparam>
 /// <typeparam name="TReply">The type of the response generated after processing the message.</typeparam>
 public class MessageHandlerConsumer<TReply>(
     IRabbitMQClient client,
