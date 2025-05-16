@@ -9,12 +9,16 @@ namespace AccountManagementService.Application.Processors;
 
 public class CreateAccountRequestProcessor(
     IAccountRepository repository,
+    RequestValidator validator,
     IPasswordService passwordService,
     ILogger<CreateAccountRequestProcessor> logger) 
     : IRequestProcessor<CreateAccountRequest, AccountDTO>
 {
     public async Task<AccountDTO> Process(CreateAccountRequest data)
     {
+        if(!await validator.Validate(data.Email, data.PhoneNumber))
+            throw new InvalidOperationException($"CREATE: Account with email '{data.Email}' or phone number '{data.PhoneNumber}' already exists.");
+        
         var account = new Account
         {
             Id = data.Id,

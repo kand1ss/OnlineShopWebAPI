@@ -27,6 +27,12 @@ public class AccountRepository(AccountDbContext context) : IAccountRepository
     public async Task<Account?> GetByIdAsync(Guid id)
         => await context.Accounts.FirstOrDefaultAsync(x => x.Id == id);
 
+    public async Task<bool> AccountWithEmailExistsAsync(string email)
+        => await context.Accounts.FirstOrDefaultAsync(x => x.Email == email) != null;
+
+    public async Task<bool> AccountWithPhoneNumberExistsAsync(string phoneNumber)
+        => await context.Accounts.FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber) != null;
+
     public async Task<IEnumerable<Account>> GetAllAsync()
         => await context.Accounts.ToListAsync();
 }

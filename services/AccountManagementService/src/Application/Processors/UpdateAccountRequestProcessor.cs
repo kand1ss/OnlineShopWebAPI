@@ -14,8 +14,17 @@ public class UpdateAccountRequestProcessor(
 {
     public async Task<AccountDTO> Process(UpdateAccountRequest data)
     {
-        var account = await repository.GetByIdAsync(data.Id)
-            ?? throw new InvalidOperationException($"UPDATE: Account with id '{data.Id}' not found.");
+        var account = await repository.GetByIdAsync(data.Id) 
+                      ?? throw new InvalidOperationException($"UPDATE: Account with id '{data.Id}' not found.");
+        
+        if (!string.IsNullOrEmpty(data.Email))
+            if (!await repository.AccountWithEmailExistsAsync(data.Email))
+                throw new InvalidOperationException($"UPDATE: Account with email '{data.Email}' already exists.");
+        
+        if (!string.IsNullOrEmpty(data.PhoneNumber))
+            if (!await repository.AccountWithPhoneNumberExistsAsync(data.PhoneNumber))
+                throw new InvalidOperationException($"UPDATE: Account with phone number '{data.PhoneNumber}' already exists.");
+        
         
         accountUpdater.Update(account, data);
         if (!string.IsNullOrWhiteSpace(data.Password))
