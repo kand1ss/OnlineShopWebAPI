@@ -15,7 +15,9 @@ public class RabbitMQClient : IRabbitMQClient, IDisposable, IAsyncDisposable
     {
         var connectionFactory = new ConnectionFactory
         {
-            HostName = _hostName
+            HostName = _hostName,
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromSeconds(5)
         };
 
         _connection = await connectionFactory.CreateConnectionAsync(ct);

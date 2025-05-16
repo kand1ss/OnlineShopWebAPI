@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
       <ProjectReference Include="..\..\shared\Application\Application.csproj" />
       <ProjectReference Include="..\..\shared\Core\Core.csproj" />
       <ProjectReference Include="..\..\shared\RabbitMQClient\RabbitMQClient.csproj" />
@@ -29,6 +30,10 @@
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="src\Domain\" />
     </ItemGroup>
 
 </Project>

@@ -7,15 +7,13 @@ using Core.Contracts;
 using Core.Requests.Accounts;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using RabbitMQ.Client;
-using RabbitMQClient;
 
 namespace AccountGateway;
 
 public class AccountGateway(
     IRequestSerializer<byte[]> requestSerializer, 
     RequestValidator validator,
-    IRabbitMQClient client) : AccountGatewayGRPC.AccountGateway.AccountGatewayBase
+    RabbitMQPoliciesWrap publisher) : AccountGatewayGRPC.AccountGateway.AccountGatewayBase
 {
     private async Task<AccountReply> ExceptionHandlingWrap(Func<Task<AccountReply>> func)
     {
@@ -37,17 +35,19 @@ public class AccountGateway(
 
     private async Task<AccountReply> TryCreateAccount(CreateAccountData request)
     {
-        var id = Guid.NewGuid();
-        var requestData = request.MapToRequest(id);
+        var requestData = request.MapToRequest();
 
         if(!validator.Validate(requestData, out var errors))
-            return CreateReply(id.ToString(), string.Join("; ", errors), false);
+            return CreateReply(requestData.Id.ToString(), string.Join("; ", errors), false);
 
         var body = requestSerializer.Serialize(requestData);
-        await client.Channel.BasicPublishAsync("", GlobalQueues.CreateAccount, 
-            true, body: body);
-
-        return CreateReply(id.ToString(), "Account creation request successfully confirmed", 
+        
+        Task.Run(async 
+            () => await publisher.PublishAsync(request.TempUserId, "", GlobalQueues.CreateAccount, body));
+        
+        
+        return CreateReply(requestData.Id.ToString(), 
+            "Account creation request successfully confirmed", 
             true);
     }
 
@@ -59,13 +59,12 @@ public class AccountGateway(
         var requestData = request.MapToRequest();
 
         if(!validator.Validate(requestData, out var errors))
-            return CreateReply(request.Id, string.Join("; ", errors), false);
+            return CreateReply(request.UserId, string.Join("; ", errors), false);
 
         var body = requestSerializer.Serialize(requestData);
-        await client.Channel.BasicPublishAsync("", GlobalQueues.UpdateAccount, 
-            true, body);
+        await publisher.PublishAsync(request.UserId, "", GlobalQueues.UpdateAccount, body);
 
-        return CreateReply(request.Id, "Account update request successfully confirmed", 
+        return CreateReply(request.UserId, "Account update request successfully confirmed", 
             true);
     }
 
@@ -81,8 +80,7 @@ public class AccountGateway(
                 false);
         
         var body = requestSerializer.Serialize(new RemoveAccountRequest(guid));
-        await client.Channel.BasicPublishAsync("", GlobalQueues.RemoveAccount, 
-            true, body);
+        await publisher.PublishAsync(userId, "", GlobalQueues.RemoveAccount, body);
 
         return CreateReply(userId, "Account removal request successfully confirmed", true);
     }
